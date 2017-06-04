@@ -41,15 +41,15 @@ class Tokenizer
   end
 
   def tokens
-    while not done?
+    until done?
       case
       when char == '.'
         advance
-        if not BREAK.include? char
+        if BREAK.include? char
+          save :dot
+        else
           ident = read_ident
           save :dotaccess, data: ident
-        else
-          save :dot
         end
       when char == '['
         advance
@@ -95,7 +95,7 @@ class Tokenizer
 
   def read_ident
     store = ''
-    while (not done?) and not (BREAK.include? char)
+    until done? or BREAK.include?(char)
       store += char
       advance
     end
@@ -112,7 +112,6 @@ class Tokenizer
     advance
     store
   end
-
 end
 
 # the .token is used to pun with the Token class
@@ -134,20 +133,16 @@ class Ast
   def inspect
     "#{kind}#{children}"
   end
-
 end
 
 class Parens < Ast
-  
   def initialize(children)
     @kind = :parens
     @children = children
   end
-
 end
 
 class Block < Ast
-
   attr_reader :arguments
   
   def initialize(children, arguments)
@@ -159,7 +154,6 @@ class Block < Ast
   def inspect
     "#{kind}#{arguments}#{children}"
   end
-
 end
 
 
@@ -182,7 +176,7 @@ class Grammar
   def collect
     yield @ast
     rest = @ast.children.clone
-    while not rest.empty?
+    until rest.empty?
       ast = rest.pop 
       
       if ast.class == Ast # otherwise it's a token
@@ -208,7 +202,6 @@ class Grammar
     line = []
 
     ast.children.each do |child|
-
       case state
       when SEARCHING
         if child.token == :colon
@@ -224,22 +217,22 @@ class Grammar
         elsif child.token == :ident
           arguments << child
         else
-          error_ast(child, "expected an identifier when \
-                            listing arguments to a block")
+          error_ast(child, 'expected an identifier when \
+                            listing arguments to a block')
         end
       when LINES
         if child.token == :open_square
           count += 1
         elsif child.token == :close_square
-          raise "Got unexpected close square bracket" if count == 0
+          raise 'Got unexpected close square bracket' if count.zero?
           count -= 1
         end
 
-        if count == 0
-          lines << Parens.new(line) if not line.empty?
+        if count.zero?
+          lines << Parens.new(line) unless line.empty?
           values << Block.new(lines, arguments)
         elsif child.token == :newline
-          lines << Parens.new(line) if not line.empty?
+          lines << Parens.new(line) unless line.empty?
           line = []
         else
           line << child
@@ -248,7 +241,6 @@ class Grammar
     end
 
     ast.children = values
-
   end
 
   def parentheses(ast)
@@ -258,13 +250,13 @@ class Grammar
       if child.token == :open_round
         count += 1
       elsif child.token == :close_round
-        raise "Got unexpected close parenthesis" if count == 0
+        raise 'Got unexpected close parenthesis' if count.zero?
         count -= 1
       end
 
       if child.token == :open_round and count == 1
         values << Parens.new([])
-      elsif child.token == :close_round and count == 0
+      elsif child.token == :close_round and count.zero?
         next
       elsif count >= 1
         values[-1].children << child
@@ -272,14 +264,13 @@ class Grammar
         values << child
       end
     end
-    raise "Got unexpected open parenthesis" if count != 0
+    raise 'Got unexpected open parenthesis' if count != 0
     ast.children = values
   end
-
 end
 
 def error_ast(ast, reason)
-  p "Error:", ast, reason
+  p 'Error:', ast, reason
 end
 
 t = Tokenizer.new(ARGF.read.chomp)
