@@ -114,16 +114,10 @@ class Tokenizer
   end
 end
 
-# the .token is used to pun with the Token class
-# the expected return type is nil and can be used
-# to differentiate Ast classes and Tokens.
-# the .arguments is only used for blocks
-# and the .fields is only used for objects
-Ast = Struct.new(:children, :kind, :arguments, :fields, :token)
-
 class Ast
 
-  attr_accessor :children, :kind
+  # token is only used to pun with Tokens
+  attr_accessor :children, :kind, :token
 
   def initialize(children, kind)
     @kind = kind
