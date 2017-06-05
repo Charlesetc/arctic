@@ -127,6 +127,12 @@ class Ast
   def inspect
     "#{kind}#{children}"
   end
+
+  def iterate(&block)
+    @children.map! &block
+    @children.select! {|c| not c.nil?}
+  end
+
 end
 
 class Parens < Ast
@@ -187,7 +193,6 @@ class Grammar
   def lambdas(ast)
 
     count = 0
-    values = []
     state = SEARCHING
 
     # used to construct the block:
@@ -195,22 +200,26 @@ class Grammar
     lines = []
     line = []
 
-    ast.children.each do |child|
+    ast.iterate do |child|
       case state
       when SEARCHING
         if child.token == :colon
           state = ARGUMENTS
+          nil
         elsif child.token == :open_square
           state = LINES
+          nil
         else
-          values << child
+          child
         end
       when ARGUMENTS
         if child.token == :open_square
           count = 1
           state = LINES
+          nil
         elsif child.token == :ident
           arguments << child
+          nil
         else
           error_ast(child, 'expected an identifier when \
                             listing arguments to a block')
@@ -225,38 +234,39 @@ class Grammar
 
         if count.zero?
           lines << Parens.new(line) unless line.empty?
-          values << Block.new(lines, arguments)
+          block = Block.new(lines, arguments)
           line = []             # just added these: -- check in the future
           state = SEARCHING
+          block
         elsif child.token == :newline
           lines << Parens.new(line) unless line.empty?
           line = []
+          nil
         else
           line << child
+          nil
         end
       end
     end
     raise 'Got unexpected open square bracket' if count != 0
-
-    ast.children = values
   end
 
-  # states
+  # states defined above
   # SEARCHING = 0
   # LINES = 2
   def parentheses(ast)
     count = 0
-    values = []
     line = []
     state = SEARCHING
-    ast.children.each do |child|
+    ast.iterate do |child|
       case state
       when SEARCHING
         if child.token == :open_round
           count = 1
           state = LINES
+          nil
         else
-          values << child
+          child
         end
       when LINES
         if child.token == :open_round
@@ -266,18 +276,18 @@ class Grammar
           count -= 1
         end
 
-        p child, count
         if count.zero?
-          values << Parens.new(line) unless line.empty?
+          val = Parens.new(line)
           line = []
           state = SEARCHING
+          val
         else
           line << child
+          nil
         end
       end
     end
     raise 'Got unexpected open parenthesis' if count != 0
-    ast.children = values
   end
 end
 
