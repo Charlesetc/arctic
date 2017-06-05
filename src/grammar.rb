@@ -128,9 +128,13 @@ class Ast
     "#{kind}#{children}"
   end
 
-  def iterate(&block)
-    @children.map! &block
-    @children.select! {|c| not c.nil?}
+  def iterate
+    # do nothing
+    # only used in Parens
+  end
+
+  def all_iterables(&block)
+    @children.each(&block)
   end
 
 end
@@ -138,6 +142,18 @@ end
 class Parens < Ast
   def initialize(children)
     @kind = :parens
+    @children = children
+  end
+
+  def iterate(&block)
+    @children.map!(&block)
+    @children.select! {|c| not c.nil?}
+  end
+end
+
+class Root < Parens
+  def initialize(children)
+    @kind = :root
     @children = children
   end
 end
@@ -156,11 +172,22 @@ class Block < Ast
   end
 end
 
+class Object_literal < Ast
+  attr_reader :fields
+
+  def initialize(field_map)
+    @fields = field_map
+  end
+
+  def all_iterables
+    @fields.each {|_name, ast| yield ast }
+  end
+end
 
 class Grammar
 
   def initialize(tokens)
-    @ast = Ast.new(tokens, :root)
+    @ast = Root.new(tokens)
   end
 
   def ast
@@ -181,7 +208,7 @@ class Grammar
       
       if ast.class == Ast # otherwise it's a token
         yield ast
-        ast.children.each { |a| rest << a }
+        ast.all_iterables { |a| rest << a }
       end
     end
   end
