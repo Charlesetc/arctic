@@ -275,22 +275,6 @@ class Grammar
           line << child
         end
       end
-      # if child.token == :open_round
-      #   count += 1
-      # elsif child.token == :close_round
-      #   raise 'Got unexpected close parenthesis' if count.zero?
-      #   count -= 1
-      # end
-
-      # if child.token == :open_round and count == 1
-      #   values << Parens.new([])
-      # elsif child.token == :close_round and count.zero?
-      #   next
-      # elsif count >= 1
-      #   values[-1].children << child
-      # else
-      #   values << child
-      # end
     end
     raise 'Got unexpected open parenthesis' if count != 0
     ast.children = values
@@ -300,9 +284,3 @@ end
 def error_ast(ast, reason)
   p 'Error:', ast, reason
 end
-
-t = Tokenizer.new(ARGF.read.chomp)
-
-g = Grammar.new(t.tokens)
-
-p g.ast
