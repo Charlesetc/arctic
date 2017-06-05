@@ -12,7 +12,7 @@ def compare(input, *expected)
   found = g.ast.inspect
   passed = found == expected
 
-  if ENV['debug'] and ($i / 10) == ENV['debug'].to_i
+  if not passed and  ENV['debug'] and ($i / 10) == ENV['debug'].to_i
     p expected
     p g.ast.inspect
   end
@@ -26,11 +26,13 @@ end
 +-> { compare "1234", ":ident(1234)"  }
 
 # Parentheses
+
++-> { compare "(())", "parens[parens[]]" }
 +-> { compare "hi (there) you", ":ident(hi)", "parens[:ident(there)]", ":ident(you)" } 
 
 # Blocks
-# THIS IS FAILING
-# +-> { compare "this [ x ]", ":ident(this)", "block[][parens[:ident(x)]]" }
++-> { compare "[ [ x ] ]", "block[][parens[block[][parens[:ident(x)]]]]" }
++-> { compare "this [ x ]", ":ident(this)", "block[][parens[:ident(x)]]" }
 +-> { compare ": [ x ]", "block[][parens[:ident(x)]]" }
 +-> { compare ": x [ x ]", "block[:ident(x)][parens[:ident(x)]]" }
 

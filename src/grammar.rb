@@ -1,5 +1,4 @@
 
-
 Token = Struct.new(:token, :data, :start, :finish)
 
 class Token
@@ -220,7 +219,7 @@ class Grammar
     until rest.empty?
       ast = rest.pop 
       
-      if ast.class == Ast # otherwise it's a token
+      if ast.is_a?(Ast) # otherwise it's a token
         yield ast
         ast.all_iterables { |a| rest << a }
       end
@@ -248,6 +247,7 @@ class Grammar
           state = Arguments
           nil
         elsif child.token == :open_square
+          count = 1
           state = Lines
           nil
         else
