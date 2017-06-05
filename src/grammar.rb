@@ -66,6 +66,12 @@ class Tokenizer
       when char == "\n"
         advance
         save :newline
+      when char == '='
+        advance
+        save :equals
+      when char == ','
+        advance
+        save :comma
       when char == ':'
         advance
         save :colon
@@ -176,11 +182,16 @@ class Object_literal < Ast
   attr_reader :fields
 
   def initialize(field_map)
+    field_map.each { |k, v| field_map[k] = Parens.new(v) }
     @fields = field_map
   end
 
   def all_iterables
     @fields.each {|_name, ast| yield ast }
+  end
+
+  def inspect
+    @fields.inspect
   end
 end
 
@@ -196,6 +207,9 @@ class Grammar
     end
     collect do |x|
       lambdas x
+    end
+    collect do |x|
+      object_literals x
     end
     @ast
   end
@@ -214,13 +228,13 @@ class Grammar
   end
 
   # states
-  SEARCHING = 0
-  ARGUMENTS = 1
-  LINES = 2
+  Searching = 0
+  Arguments = 1
+  Lines = 2
   def lambdas(ast)
 
     count = 0
-    state = SEARCHING
+    state = Searching
 
     # used to construct the block:
     arguments = []
@@ -229,29 +243,29 @@ class Grammar
 
     ast.iterate do |child|
       case state
-      when SEARCHING
+      when Searching
         if child.token == :colon
-          state = ARGUMENTS
+          state = Arguments
           nil
         elsif child.token == :open_square
-          state = LINES
+          state = Lines
           nil
         else
           child
         end
-      when ARGUMENTS
+      when Arguments
         if child.token == :open_square
           count = 1
-          state = LINES
+          state = Lines
           nil
         elsif child.token == :ident
           arguments << child
           nil
         else
-          error_ast(child, 'expected an identifier when \
-                            listing arguments to a block')
+          error_ast(child,
+          'expected an identifier when listing arguments to a block')
         end
-      when LINES
+      when Lines
         if child.token == :open_square
           count += 1
         elsif child.token == :close_square
@@ -263,9 +277,9 @@ class Grammar
           lines << Parens.new(line) unless line.empty?
           block = Block.new(lines, arguments)
           line = []             # just added these: -- check in the future
-          state = SEARCHING
+          state = Searching
           block
-        elsif child.token == :newline
+        elsif child.token == :newline and count == 1
           lines << Parens.new(line) unless line.empty?
           line = []
           nil
@@ -279,23 +293,23 @@ class Grammar
   end
 
   # states defined above
-  # SEARCHING = 0
-  # LINES = 2
+  # Searching = 0
+  # Lines = 2
   def parentheses(ast)
     count = 0
     line = []
-    state = SEARCHING
+    state = Searching
     ast.iterate do |child|
       case state
-      when SEARCHING
+      when Searching
         if child.token == :open_round
           count = 1
-          state = LINES
+          state = Lines
           nil
         else
           child
         end
-      when LINES
+      when Lines
         if child.token == :open_round
           count += 1
         elsif child.token == :close_round
@@ -306,7 +320,7 @@ class Grammar
         if count.zero?
           val = Parens.new(line)
           line = []
-          state = SEARCHING
+          state = Searching
           val
         else
           line << child
@@ -316,8 +330,69 @@ class Grammar
     end
     raise 'Got unexpected open parenthesis' if count != 0
   end
+
+  # states defined above
+  # Searching = 0
+  # Lines = 2
+  Fields = 4
+  Equals = 5
+  def object_literals(ast)
+    count = 0
+    field = nil
+    fields = {}
+    state = Searching
+    ast.iterate do |child|
+      case state
+      when Searching
+        if child.token == :open_angle
+          count = 1
+          state = Fields
+          nil
+        else
+          child
+        end
+      when Fields
+        unless child.token == :ident
+          error_ast(child,
+          'expected an identifier to start a field of this object')
+        end
+
+        field = child.data
+        fields[field] = []
+        state = Equals
+        nil
+      when Equals
+        unless child.token == :equals
+          error_ast(child,
+          'expected an equals sign after the start an object field')
+        end
+        state = Lines
+        nil
+      when Lines
+        if child.token == :open_angle
+          count += 1
+        elsif child.token == :close_angle
+          raise 'Got unexpected close angle bracket' if count.zero?
+          count -= 1
+        end
+
+        if count.zero?
+          obj = Object_literal.new(fields)
+          fields = {}
+          state = Searching
+          obj
+        elsif child.token == :comma and count == 1
+          state = Fields
+        else
+          fields[field] << child
+          nil
+        end
+      end
+    end
+  end
 end
 
 def error_ast(ast, reason)
-  p 'Error:', ast, reason
-end
+  STDERR.puts "Error: #{reason}", ast
+  exit(0)
+ end
