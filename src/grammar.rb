@@ -186,7 +186,7 @@ class Grammar
   LINES = 2
   def lambdas(ast)
 
-    count = 1
+    count = 0
     values = []
     state = SEARCHING
 
@@ -207,6 +207,7 @@ class Grammar
         end
       when ARGUMENTS
         if child.token == :open_square
+          count = 1
           state = LINES
         elsif child.token == :ident
           arguments << child
@@ -225,6 +226,8 @@ class Grammar
         if count.zero?
           lines << Parens.new(line) unless line.empty?
           values << Block.new(lines, arguments)
+          line = []             # just added these: -- check in the future
+          state = SEARCHING
         elsif child.token == :newline
           lines << Parens.new(line) unless line.empty?
           line = []
@@ -233,30 +236,61 @@ class Grammar
         end
       end
     end
+    raise 'Got unexpected open square bracket' if count != 0
 
     ast.children = values
   end
 
+  # states
+  # SEARCHING = 0
+  # LINES = 2
   def parentheses(ast)
     count = 0
     values = []
+    line = []
+    state = SEARCHING
     ast.children.each do |child|
-      if child.token == :open_round
-        count += 1
-      elsif child.token == :close_round
-        raise 'Got unexpected close parenthesis' if count.zero?
-        count -= 1
-      end
+      case state
+      when SEARCHING
+        if child.token == :open_round
+          count = 1
+          state = LINES
+        else
+          values << child
+        end
+      when LINES
+        if child.token == :open_round
+          count += 1
+        elsif child.token == :close_round
+          raise 'Got unexpected close parenthesis' if count.zero?
+          count -= 1
+        end
 
-      if child.token == :open_round and count == 1
-        values << Parens.new([])
-      elsif child.token == :close_round and count.zero?
-        next
-      elsif count >= 1
-        values[-1].children << child
-      else
-        values << child
+        p child, count
+        if count.zero?
+          values << Parens.new(line) unless line.empty?
+          line = []
+          state = SEARCHING
+        else
+          line << child
+        end
       end
+      # if child.token == :open_round
+      #   count += 1
+      # elsif child.token == :close_round
+      #   raise 'Got unexpected close parenthesis' if count.zero?
+      #   count -= 1
+      # end
+
+      # if child.token == :open_round and count == 1
+      #   values << Parens.new([])
+      # elsif child.token == :close_round and count.zero?
+      #   next
+      # elsif count >= 1
+      #   values[-1].children << child
+      # else
+      #   values << child
+      # end
     end
     raise 'Got unexpected open parenthesis' if count != 0
     ast.children = values
