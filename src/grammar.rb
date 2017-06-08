@@ -11,7 +11,7 @@ class Token
   end
 end
 
-BREAK = ".{}()[]<> \t\n:;".chars
+BREAK = ".{}(,)[]<=> \t\n:;".chars
 
 class Tokenizer
 
@@ -144,9 +144,9 @@ class Ast
 
 end
 
-class Parens < Ast
+class Root < Ast
   def initialize(children)
-    @kind = :parens
+    @kind = :root
     @children = children
   end
 
@@ -156,10 +156,15 @@ class Parens < Ast
   end
 end
 
-class Root < Parens
+class Parens < Root
   def initialize(children)
-    @kind = :root
+    @kind = :parens
     @children = children
+  end
+
+  def inspect
+    inner = @children.map {|x| x.inspect}.join(" ")
+    "(#{inner})"
   end
 end
 
@@ -190,7 +195,8 @@ class Object_literal < Ast
   end
 
   def inspect
-    @fields.inspect
+    inner = @fields.map {|name, ast| "#{name} = #{ast.inspect}" }
+    "<#{inner.join(" , ")}>"
   end
 end
 
@@ -383,12 +389,14 @@ class Grammar
           obj
         elsif child.token == :comma and count == 1
           state = Fields
+          nil
         else
           fields[field] << child
           nil
         end
       end
     end
+    raise 'Got unexpected open angle bracket' if count != 0
   end
 end
 

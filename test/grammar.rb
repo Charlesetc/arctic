@@ -27,12 +27,15 @@ end
 
 # Parentheses
 
-+-> { compare "(())", "parens[parens[]]" }
-+-> { compare "hi (there) you", ":ident(hi)", "parens[:ident(there)]", ":ident(you)" } 
++-> { compare "(())", "(())" }
++-> { compare "hi (there) you", ":ident(hi)", "(:ident(there))", ":ident(you)" }
 
 # Blocks
-+-> { compare "[ [ x ] ]", "block[][parens[block[][parens[:ident(x)]]]]" }
-+-> { compare "this [ x ]", ":ident(this)", "block[][parens[:ident(x)]]" }
-+-> { compare ": [ x ]", "block[][parens[:ident(x)]]" }
-+-> { compare ": x [ x ]", "block[:ident(x)][parens[:ident(x)]]" }
++-> { compare "[ [ x ] ]", "block[][(block[][(:ident(x))])]" }
++-> { compare "this [ x ]", ":ident(this)", "block[][(:ident(x))]" }
++-> { compare ": [ x ]", "block[][(:ident(x))]" }
++-> { compare ": x [ x ]", "block[:ident(x)][(:ident(x))]" }
 
+# Objects
+
+# Combinations
