@@ -38,4 +38,11 @@ end
 
 # Objects
 
++-> { compare "<x = y>", "<x = (:ident(y))>" }
++-> { compare "<x= y>", "<x = (:ident(y))>" }
++-> { compare "<x =y>", "<x = (:ident(y))>" }
++-> { compare "<x=y>", "<x = (:ident(y))>" }
++-> { compare "<x = y, y = z>", "<x = (:ident(y)) , y = (:ident(z))>" }
++-> { compare "<x = <y = z>>", "<x = (<y = (:ident(z))>)>" }
+
 # Combinations
