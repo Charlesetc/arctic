@@ -46,3 +46,8 @@ end
 +-> { compare "<x = <y = z>>", "<x = (<y = (:ident(z))>)>" }
 
 # Combinations
+
++-> { compare "<x = (f a)>", "<x = ((:ident(f) :ident(a)))>" }
++-> { compare ": x [ < y = x > ]", "block[:ident(x)][(<y = (:ident(x))>)]"}
+
+
