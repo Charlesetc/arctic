@@ -122,11 +122,14 @@ end
 class Ast
 
   # token is only used to pun with Tokens
-  attr_accessor :children, :kind, :token
+  attr_accessor :children, :kind, :token, :start, :finish
 
   def initialize(children, kind)
     @kind = kind
     @children = children
+
+    @start = @children.first.start
+    @finish = @children.last.finish
   end
 
   def inspect
@@ -148,6 +151,14 @@ class Root < Ast
   def initialize(children)
     @kind = :root
     @children = children
+
+    if @children.first
+      @start = @children.first.start
+      @finish = @children.last.finish
+    else
+      @start = 0
+      @finish = 0
+    end
   end
 
   def iterate(&block)
@@ -157,9 +168,12 @@ class Root < Ast
 end
 
 class Parens < Root
-  def initialize(children)
+  def initialize(children, backup_child)
     @kind = :parens
     @children = children
+
+    @start = (@children.first || backup_child).start
+    @finish = (@children.last || backup_child).finish
   end
 
   def inspect
@@ -171,10 +185,13 @@ end
 class Block < Ast
   attr_reader :arguments
   
-  def initialize(children, arguments)
+  def initialize(children, arguments, backup_child)
     @children = children
     @arguments = arguments
     @kind = :block
+
+    @start = (@arguments.first || @children.first || backup_child).start
+    @finish = (@children.last || backup_child).finish
   end
 
   def inspect
@@ -185,9 +202,12 @@ end
 class Object_literal < Ast
   attr_reader :fields
 
-  def initialize(field_map)
-    field_map.each { |k, v| field_map[k] = Parens.new(v) }
+  def initialize(field_map, backup_child)
+    field_map.each { |k, v| field_map[k] = Parens.new(v, nil) }
     @fields = field_map
+
+    @start = @fields.values.map { |x| x.start }.min
+    @finish = @fields.values.map { |x| x.finish }.max
   end
 
   def all_iterables
@@ -206,7 +226,7 @@ class Grammar
     @ast = Root.new(tokens)
   end
 
-  def ast
+  def produce_ast
     collect do |x|
       parentheses x
     end
@@ -280,13 +300,13 @@ class Grammar
         end
 
         if count.zero?
-          lines << Parens.new(line) unless line.empty?
-          block = Block.new(lines, arguments)
+          lines << Parens.new(line, child) unless line.empty?
+          block = Block.new(lines, arguments, child)
           line = []             # just added these: -- check in the future
           state = Searching
           block
         elsif child.token == :newline and count == 1
-          lines << Parens.new(line) unless line.empty?
+          lines << Parens.new(line, child) unless line.empty?
           line = []
           nil
         else
@@ -324,7 +344,7 @@ class Grammar
         end
 
         if count.zero?
-          val = Parens.new(line)
+          val = Parens.new(line, child)
           line = []
           state = Searching
           val
@@ -383,7 +403,7 @@ class Grammar
         end
 
         if count.zero?
-          obj = Object_literal.new(fields)
+          obj = Object_literal.new(fields, child)
           fields = {}
           state = Searching
           obj
