@@ -1,7 +1,21 @@
 
-Token = Struct.new(:token, :data, :start, :finish)
+# Token = Struct.new(:token, :data, :start, :finish)
+
+def is_ident(tok, name)
+  tok.token == :ident and tok.data == name
+end
 
 class Token
+
+  attr_accessor :data, :token, :start, :finish
+
+  def initialize(token, data, start, finish)
+    @token = token
+    @data = data
+    @start = start
+    @finish = finish
+  end
+
   def inspect
     if data
       "#{token.inspect}(#{data})"
@@ -9,16 +23,12 @@ class Token
       token.inspect
     end
   end
+
 end
 
-def is_ident(tok, name)
-  tok.token == :ident and tok.data == name
-end
+class Ast < Token
 
-class Ast
-
-  # token is only used to pun with Tokens
-  attr_accessor :children, :kind, :token, :start, :finish
+  attr_accessor :children, :kind
 
   def initialize(children, kind)
     @kind = kind
@@ -41,6 +51,23 @@ class Ast
     @children.each(&block)
   end
 
+  def collect(cls: Ast)
+    yield self if self.is_a?(cls)
+
+    rest = self.children.clone
+    until rest.empty?
+      ast = rest.pop
+
+      if ast.is_a?(cls) # otherwise it's a token
+        yield ast
+        ast.all_iterables { |a| rest << a } if ast.is_a?(Ast)
+      elsif ast.is_a?(Ast)
+        ast.all_iterables { |a| rest << a }
+      end
+
+    end
+  end
+
 end
 
 class Root < Ast
@@ -60,23 +87,6 @@ class Root < Ast
   def iterate(&block)
     @children.map!(&block)
     @children.select! {|c| not c.nil?}
-  end
-
-  def collect(cls: Ast)
-    yield self if self.is_a?(cls)
-
-    rest = self.children.clone
-    until rest.empty?
-      ast = rest.pop
-
-      if ast.is_a?(cls) # otherwise it's a token
-        yield ast
-        ast.all_iterables { |a| rest << a }
-      elsif ast.is_a?(Ast)
-        ast.all_iterables { |a| rest << a }
-      end
-
-    end
   end
 
 end

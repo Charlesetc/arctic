@@ -9,4 +9,4 @@ Artic is the kind of programming language you occasionally glimpse standing in t
 
 Or not! Artic's for everyone. 👻 Welcome
 
-Artic is a small, easy, and fast language. The goal is to create a statically typed, compiled language, that feels as dynamic as ruby or lisp. It does this with **inferred structural types**. Think implicit duck-typing, checked at compile-time.
+Artic is a small, easy, and fast language. The goal is to create a statically typed, compiled language, that feels as dynamic as ruby or lisp. It does this with **inferred structural types**. Think implicit duck-typing, and checked at compile-time.

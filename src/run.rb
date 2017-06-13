@@ -8,4 +8,8 @@ g = Grammar.new(t.tokens)
 
 ty = Typer.new(g.produce_ast)
 
+ast = ty.produce_ast
+
+ty.print_types
+
 p ty.produce_ast
