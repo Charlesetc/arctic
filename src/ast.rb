@@ -11,6 +11,10 @@ class Token
   end
 end
 
+def is_ident(tok, name)
+  tok.token == :ident and tok.data == name
+end
+
 class Ast
 
   # token is only used to pun with Tokens
@@ -58,16 +62,20 @@ class Root < Ast
     @children.select! {|c| not c.nil?}
   end
 
-  def collect
-    yield self
+  def collect(cls: Ast)
+    yield self if self.is_a?(cls)
+
     rest = self.children.clone
     until rest.empty?
       ast = rest.pop
 
-      if ast.is_a?(Ast) # otherwise it's a token
+      if ast.is_a?(cls) # otherwise it's a token
         yield ast
         ast.all_iterables { |a| rest << a }
+      elsif ast.is_a?(Ast)
+        ast.all_iterables { |a| rest << a }
       end
+
     end
   end
 
@@ -102,6 +110,7 @@ class Block < Ast
 
   def inspect
     "#{kind}#{arguments}#{children}"
+
   end
 end
 

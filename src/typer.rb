@@ -86,13 +86,19 @@ end
 
 class Typer
 
-  def initialize(ast)
-    @ast = ast
+  def initialize(root)
+    @root = root
 
     @types = Typetable.new
   end
 
   def produce_ast
+
+    # clean up tree first!
+    # get rid of extra parentheses
+
+
+    convert_let_statements
 
     aliases_for_let_statements
     aliases_for_block_arguments
@@ -100,7 +106,30 @@ class Typer
     constraints_for_function_application
     constraints_for_field_access
 
-    @ast
+    @root
+  end
+
+  def convert_let_statements
+
+    @root.collect(cls: Block) do |block|
+      i = 0
+      while i != block.children.length do
+        child = block.children[i]
+        i += 1
+        next if child.class != Parens
+        next if not is_ident(child.children[0], "define")
+
+        # construct new child
+        new_scope = Block.new(block.children[(i)..block.children.length] || [], [], child)
+        child.children << new_scope
+        child.children[0].data = 'let_in'
+
+        # rewrite block children
+        block.children = block.children[0..(i-1)]
+        # block.children << child
+      end
+    end
+
   end
 
   def aliases_for_let_statements
