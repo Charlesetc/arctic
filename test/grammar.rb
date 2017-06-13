@@ -28,6 +28,7 @@ end
 +-> { compare "foobar", ":ident(foobar)"  }
 --> { compare "foobar", ":idont(fuubar)"  }
 +-> { compare "1234", ":ident(1234)"  }
+compare "foobar", ":ident(foobar)"
 
 # Parentheses
 
@@ -53,6 +54,7 @@ end
 
 +-> { compare "<x = (f a)>", "<x = ((:ident(f) :ident(a)))>" }
 +-> { compare ": x [ < y = x > ]", "block[:ident(x)][(<y = (:ident(x))>)]"}
+compare "<x = (f a)>", "<x = ((:ident(f) :ident(a)))>"
 
 
 # Line numbers

@@ -1,39 +1,30 @@
 
 require 'set'
+require_relative './ast'
 
 #
 # Types
 #
 
+Generic = Struct.new(:id, :start, :finish)
 
-class Type
+class Type ; end # this type is not meant to be instantiated
 
-  def constrain_to_literal(kind)
-    return Literal.new(kind)
-  end
+class Unknown < Type  ; end
 
-  def constrain_with_field(field, value)
-    return Open_object.new(field, value)
-  end
+class Literal < Type ; end
 
+class Function < Type ; end
+
+class Open_object < Type ; end
+
+$generic_counter = 0
+
+def new_generic(start, finish)
+  Generic.new(i, start, finish)
+  $generic_counter += 1
 end
 
-class Literal < Type
-  
-  def initialize(kind)
-    @kind = kind
-  end
-
-
-end
-
-class Function < Type
-
-end
-
-class Open_object < Type
-
-end
 
 #
 # Ast
@@ -43,16 +34,47 @@ end
 # type-specific features 
 class Ast
   
+  # lazily make the types!
+  def type
+    if @type.nil?
+      @type = new_generic(@start, @finish)
+    else
+      @type
+    end
+  end
 
 end
 
-class Typeholder
+class Typetable
 
   def initialize
 
     # map from sets of Generics to their type.
-    @types = {}
-    @types = {}
+    #
+    # this is the source of truth.
+    @type_mapping = {}
+  end
+
+  def get_type_of_generic(generic)
+    @type_mapping.each do |k, v|
+      if k.include? generic
+        return v
+      end
+    end
+
+    # it should never be nil.
+    nil
+  end
+
+  def alias_generics(a, b)
+    atype = get_type_of_generic(a)
+    btype = get_type_of_generic(b)
+
+    if not btype
+      a = b = a
+    end
+
+    raise "unimplemented"
 
   end
 
@@ -67,17 +89,33 @@ class Typer
   def initialize(ast)
     @ast = ast
 
-    @types = {}
+    @types = Typetable.new
   end
 
   def produce_ast
 
-    add_types
+    aliases_for_let_statements
+    aliases_for_block_arguments
+
+    constraints_for_function_application
+    constraints_for_field_access
 
     @ast
   end
 
-  def add_types
+  def aliases_for_let_statements
+
+  end
+
+  def aliases_for_block_arguments
+
+  end
+
+  def constraints_for_function_application
+
+  end
+
+  def constraints_for_field_access
 
   end
 
