@@ -125,6 +125,22 @@ class Grammar
     collect do |x|
       object_literals x
     end
+
+    collect do |x|
+      binary_operator(x, ["or"])
+    end
+    collect do |x|
+      binary_operator(x, ["and"])
+    end
+
+    collect do |x|
+      binary_operator(x, "+-")
+    end
+
+    collect do |x|
+      binary_operator(x, "*/")
+    end
+
     @ast
   end
 
@@ -297,6 +313,46 @@ class Grammar
       end
     end
     raise 'Got unexpected open angle bracket' if count != 0
+  end
+
+  # this is doable.
+  # search for a plus or minus.
+  # If it's there, divide the symbols
+  # into two groups, as arguments to the
+  # plus or minus.
+  # then do the same search on the group to the right
+  # maybe then make this generic for /, *, and, or, etc.
+  def binary_operator(ast, operators)
+
+    i = 0
+    index = nil
+
+    ast.iterate do |child|
+      # remove this line for right associativity
+      unless index
+        if child.token == :ident and operators.include?(child.data)
+          index = i
+        end
+      end
+      i += 1
+      child
+    end
+
+    return unless index
+    return if index == 0
+
+    length = ast.children.length
+    if index == length - 1
+      error_ast(ast, "Found operator without right side")
+    end
+
+    left = ast.children[0..index-1]
+    right = ast.children[index+1..length]
+    ast.children = [
+      ast.children[index],
+      Parens.new(left, ast),
+      Parens.new(right, ast),
+    ]
   end
 end
 
