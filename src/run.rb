@@ -12,4 +12,4 @@ ast = ty.produce_ast
 
 ty.print_types
 
-p ty.produce_ast
+p ast

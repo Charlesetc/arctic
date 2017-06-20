@@ -162,6 +162,8 @@ class Typer
 
           # includes everything and Tokens.
           parens.collect(cls: Token) do |tok|
+            # if the token is the same as the ident from the 'let_in'
+            # then alias the two
             if is_ident(tok, parens.children[1].data)
               @types.alias_generics(tok.type, parens.type)
             end
@@ -171,9 +173,15 @@ class Typer
       end
     end
 
-    def aliases_for_block_arguments
-
-    end
+#     def aliases_for_block_arguments
+#       # This code assumes that 'alias_generics'
+#       # is only called before by aliases_for_let_statements.
+#       @root.collect(cls: Block) do |block|
+#         block.arguments.each do |argument|
+#           p argument
+#         end
+#       end
+#     end
 
     def constraints_for_function_application
 
