@@ -16,3 +16,7 @@ define fizzbuzz [
   ]
 
 ]
+
+define main [
+  fizzbuzz ()
+]
