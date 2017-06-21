@@ -5,5 +5,5 @@ It should be pretty easy, with garbage collection and all.
 And then you can get a larger base of users while rapidly
 rolling out and advertising a native version.
 
-Plus javascript objects will be easy to use with the artic
+Plus javascript objects will be easy to use with the arctic
 objects and it has closures that might work.

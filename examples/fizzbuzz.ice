@@ -1,5 +1,5 @@
 
--- fizzbuzz.artic
+-- fizzbuzz.ice
 
 define fizzbuzz [
 
