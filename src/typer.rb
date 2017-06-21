@@ -83,9 +83,11 @@ class Typetable
       ctype = constrain atype btype
       @type_mapping[a.union b] = ctype
     else
+
       if btype
         aset, bset = bset, aset
         atype, btype = btype, atype
+        a, b = b, a
       end
       # now atype is not nil
       aset << b
@@ -119,6 +121,7 @@ class Typer
 
     aliases_for_let_statements
     aliases_for_block_arguments
+    aliases_for_block_returns
 
     constraints_for_function_application
     constraints_for_field_access
@@ -181,6 +184,10 @@ class Typer
 #           p argument
 #         end
 #       end
+    end
+
+    def aliases_for_block_returns
+
     end
 
     def constraints_for_function_application
