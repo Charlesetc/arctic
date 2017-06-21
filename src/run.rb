@@ -12,4 +12,4 @@ ast = ty.produce_ast
 
 ty.print_types
 
-p ast
+puts ast.inspect_types

@@ -173,7 +173,7 @@ class Typer
       end
     end
 
-#     def aliases_for_block_arguments
+    def aliases_for_block_arguments
 #       # This code assumes that 'alias_generics'
 #       # is only called before by aliases_for_let_statements.
 #       @root.collect(cls: Block) do |block|
@@ -181,7 +181,7 @@ class Typer
 #           p argument
 #         end
 #       end
-#     end
+    end
 
     def constraints_for_function_application
 

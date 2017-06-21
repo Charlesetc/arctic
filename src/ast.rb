@@ -24,6 +24,14 @@ class Token
     end
   end
 
+  def inspect_types
+    if data
+      "#{token}(#{data})" + "_#{type}"
+    else
+      token.inspect + "_#{type}" # do you need this?
+    end
+  end
+
 end
 
 class Ast < Token
@@ -40,6 +48,10 @@ class Ast < Token
 
   def inspect
     "#{kind}#{children}"
+  end
+
+  def inspect_types
+    "#{kind}[#{children.map{|x| x.inspect_types}.join(", ")}]" + "_#{type}"
   end
 
   def iterate
@@ -104,6 +116,11 @@ class Parens < Root
     inner = @children.map {|x| x.inspect}.join(" ")
     "(#{inner})"
   end
+
+  def inspect_types
+    inner = @children.map {|x| x.inspect_types}.join(" ")
+    "(#{inner})_#{type}"
+  end
 end
 
 class Block < Ast
@@ -120,7 +137,12 @@ class Block < Ast
 
   def inspect
     "#{kind}#{arguments}#{children}"
+  end
 
+  def inspect_types
+    args = arguments.map{|x| x.inspect_types}.join(", ")
+    chlds = children.map{|x| x.inspect_types}.join(", ")
+    "#{kind}[#{args}][#{chlds}]_#{type}"
   end
 end
 
@@ -141,6 +163,11 @@ class Object_literal < Ast
 
   def inspect
     inner = @fields.map {|name, ast| "#{name} = #{ast.inspect}" }
+    "<#{inner.join(" , ")}>"
+  end
+
+  def inspect_types
+    inner = @fields.map {|name, ast| "#{name} = #{ast.inspect_types}" }
     "<#{inner.join(" , ")}>"
   end
 end
