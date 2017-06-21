@@ -105,6 +105,86 @@ class Typetable
 end
 
 #
+# Logic for keeping track of name stack
+#
+
+
+class Aliaser
+
+  def initialize(types)
+    @types = types
+    @names = []
+  end
+
+  def get(name)
+    @names.map { |x| x[name] }.last
+  end
+
+  def add(stack)
+    @names << stack
+  end
+
+  def drop
+    @names.pop
+  end
+
+  def post
+    lambda do |a|
+
+      aliased(a)
+
+      return unless is_let_in(a) or a.is_a?(Block)
+      drop
+    end
+  end
+
+  def is_let_in(ast)
+    ast.is_a?(Parens) and
+      is_ident(ast.children[0], "let_in")
+  end
+
+  def record_let(ast)
+    return unless is_let_in(ast)
+
+    @types.alias_generics(ast.type, ast.children[2].type)
+    add({ast.children[1].data => ast.type})
+  end
+
+  def record_block(ast)
+    return unless ast.is_a?(Block)
+
+    arguments = ast.arguments.map do |a|
+      [a.data, a.type]
+    end.to_h
+
+    add(arguments)
+  end
+
+  def aliased(ast)
+
+    # includes everything, and tokens
+    ast.collect(cls: Token) do |tok|
+
+      # this is kind of sketchy, but here's what's happening:
+      #
+      # `aliased` is called on every `collect` in `aliases_for_names`
+      # we only alias the first time it's called, and we do this
+      # by checking if to see if the token already has it's type in
+      # the type table. (so it's important not much comes before aliases_for_names)
+      # but aliases_for_names is a very important function, and no other typing
+      # things really make sense without having the names taken care of...
+      # so it's reasonable to expect this to be the first one.
+      if (type = get(tok.data)) and not @types.already_has(tok.type)
+        # puts "HI " + tok.to_s
+        @types.alias_generics(tok.type, type)
+      end
+    end
+
+  end
+end
+
+
+#
 # Logic for adding types
 #
 
@@ -160,80 +240,6 @@ class Typer
         end
       end
 
-    end
-
-    class Aliaser
-
-      def initialize(types)
-        @types = types
-        @names = []
-      end
-
-      def get(name)
-        @names.map { |x| x[name] }.last
-      end
-
-      def add(stack)
-        @names << stack
-      end
-
-      def drop
-        @names.pop
-      end
-
-      def post
-        lambda do |a|
-
-          aliased(a)
-
-          return unless is_let_in(a) or a.is_a?(Block)
-          drop
-        end
-      end
-
-      def is_let_in(ast)
-        ast.is_a?(Parens) and
-          is_ident(ast.children[0], "let_in")
-      end
-
-      def record_let(ast)
-        return unless is_let_in(ast)
-
-        @types.alias_generics(ast.type, ast.children[2].type)
-        add({ast.children[1].data => ast.type})
-      end
-
-      def record_block(ast)
-        return unless ast.is_a?(Block)
-
-        arguments = ast.arguments.map do |a|
-          [a.data, a.type]
-        end.to_h
-
-        add(arguments)
-      end
-
-      def aliased(ast)
-
-        # includes everything, and tokens
-        ast.collect(cls: Token) do |tok|
-
-          # this is kind of sketchy, but here's what's happening:
-          #
-          # `aliased` is called on every `collect` in `aliases_for_names`
-          # we only alias the first time it's called, and we do this
-          # by checking if to see if the token already has it's type in
-          # the type table. (so it's important not much comes before aliases_for_names)
-          # but aliases_for_names is a very important function, and no other typing
-          # things really make sense without having the names taken care of...
-          # so it's reasonable to expect this to be the first one.
-          if (type = get(tok.data)) and not @types.already_has(tok.type)
-            # puts "HI " + tok.to_s
-            @types.alias_generics(tok.type, type)
-          end
-        end
-
-      end
     end
 
     def aliases_for_names
