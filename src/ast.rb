@@ -5,6 +5,8 @@ def is_ident(tok, name)
   tok.token == :ident and tok.data == name
 end
 
+Separator = Struct.new(:ast, :post)
+
 class Token
 
   attr_accessor :data, :token, :start, :finish
@@ -31,6 +33,8 @@ class Token
       token.inspect + "_#{type}" # do you need this?
     end
   end
+
+  # def type <-- defined in typer.rb!
 
 end
 
@@ -63,20 +67,32 @@ class Ast < Token
     @children.each(&block)
   end
 
-  def collect(cls: Ast)
+  def collect(cls: Ast, post:nil)
     yield self if self.is_a?(cls)
 
     rest = self.children.clone
     until rest.empty?
       ast = rest.pop
 
-      if ast.is_a?(cls) # otherwise it's a token
-        yield ast
-        ast.all_iterables { |a| rest << a } if ast.is_a?(Ast)
-      elsif ast.is_a?(Ast)
-        ast.all_iterables { |a| rest << a }
+      # This little bit is used to have
+      # callbacks after the completion of an
+      # ast's children
+      #
+      # Perhaps there is a cleaner way to do this
+      # (certainly with recursion) but it's not
+      # THAT ugly so we'll leave it in for now.
+      if ast.is_a?(Separator)
+        ast.post.call(ast.ast) if ast.post
       end
 
+      if ast.is_a?(cls) # otherwise it's a token
+        yield ast
+      end
+
+      if ast.is_a?(Ast)
+        rest << Separator.new(ast, post)
+        ast.all_iterables { |a| rest << a }
+      end
     end
   end
 
