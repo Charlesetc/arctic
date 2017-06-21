@@ -10,6 +10,6 @@ ty = Typer.new(g.produce_ast)
 
 ast = ty.produce_ast
 
-ty.print_types
+p ty.stringify_types
 
 puts ast.inspect_types

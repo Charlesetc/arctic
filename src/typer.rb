@@ -132,8 +132,10 @@ class Typer
     @root
   end
 
-  def print_types
-    p @types.type_mapping
+  def stringify_types
+    @types.type_mapping.map do |k, v|
+      [k.to_a, v]
+    end.to_h.inspect
   end
 
   private
