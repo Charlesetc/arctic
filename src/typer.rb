@@ -1,5 +1,6 @@
 
 require 'set'
+require_relative './utils'
 require_relative './ast'
 
 #
@@ -13,6 +14,9 @@ class Type ; end # this type is not meant to be instantiated
 class Unknown < Type  ; end
 
 class Literal < Type ; end
+
+  class StringLiteral < Literal ; end
+  class IntegerLiteral < Literal ; end
 
 class Function < Type ; end
 
@@ -34,12 +38,12 @@ end
 # type-specific features 
 class Token
   
-  # lazily make the types!
-  def type
-    if @type
-      @type
+  # lazily make the generics!
+  def generic
+    if @generic
+      @generic
     else
-      @type = new_generic(@start, @finish)
+      @generic = new_generic(@start, @finish)
     end
   end
 
@@ -146,15 +150,15 @@ class Aliaser
   def record_let(ast)
     return unless is_let_in(ast)
 
-    @types.alias_generics(ast.type, ast.children[2].type)
-    add({ast.children[1].data => ast.type})
+    @types.alias_generics(ast.generic, ast.children[2].generic)
+    add({ast.children[1].data => ast.generic})
   end
 
   def record_block(ast)
     return unless ast.is_a?(Block)
 
     arguments = ast.arguments.map do |a|
-      [a.data, a.type]
+      [a.data, a.generic]
     end.to_h
 
     add(arguments)
@@ -174,9 +178,9 @@ class Aliaser
       # but aliases_for_names is a very important function, and no other typing
       # things really make sense without having the names taken care of...
       # so it's reasonable to expect this to be the first one.
-      if (type = get(tok.data)) and not @types.already_has(tok.type)
+      if (generic = get(tok.data)) and not @types.already_has(tok.generic)
         # puts "HI " + tok.to_s
-        @types.alias_generics(tok.type, type)
+        @types.alias_generics(tok.generic, generic)
       end
     end
 
@@ -204,8 +208,9 @@ class Typer
     convert_let_statements
 
     aliases_for_names # (let statements and block arguments)
-    aliases_for_block_returns
 
+    constraints_for_token_literals
+    constraints_for_block_literals
     constraints_for_function_application
     constraints_for_field_access
 
@@ -253,7 +258,20 @@ class Typer
       end
     end
 
-    def aliases_for_block_returns
+    def constraints_for_token_literals
+      @root.collect(cls: Token) do |tok|
+        if tok.class == Token
+          if tok.token == :ident and tok.data.valid_integer?
+
+          elsif tok.token == :string
+
+          end
+        end
+      end
+
+    end
+
+    def constraints_for_block_literals
 
     end
 
