@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="style.css" type="text/css" />
+  
+  
+  <ul id='nav'>
+    <li><a href='./brie.html'>Brie</a></li>
+    <li><a href='./syntax.html'>Syntax</a></li>
+    <li><a href='./types.html'>Types</a></li>
+  </ul>
+  
+  
+  <a href='#' style='cursor:default'/><img src="./fox.gif" alt="a drawing of a fox" id='fox' /></a>
+</head>
+<body>
+<h1 id="brie-syntax">Brie <em>[ syntax ]</em></h1>
+<p>Brie's syntax starts with the syntax of a basic ml language like Haskell.</p>
+<pre><code>            -- Comments
+2 + 2 / 3   -- Operators
+print &quot;hi&quot;  -- Function calls
+let x = 2   -- Bindings</code></pre>
+<p>Then we add the lambda syntax <code>: [ ]</code>, which is used for blocks, functions, classes, etc.</p>
+<pre><code>[1,2,3].map : x [ x * x ]
+
+define hello_world [
+  &quot;Screw you, world!&quot;
+]</code></pre>
+<p>Objects have literals; you don't need to define a class.</p>
+<pre><code>let mysheep = &lt;fluffy = true, name = &quot;Herbert&quot;&gt;
+print mysheep.name</code></pre>
+<p>But you definitely can.</p>
+<pre><code>class sheep [
+  field fluffy = true
+  field name
+  method print_name = print name
+]
+let mysheep = sheep &lt;name = &quot;Herbert&quot;&gt;
+
+mysheep.fluffy    --&gt; true
+mysheep.print_name</code></pre>
+<p>And that is the syntax! Learn more about Brie by looking at its <a href="./types.html"><em>type system</em></a>.</p>
+</body>
+</html>

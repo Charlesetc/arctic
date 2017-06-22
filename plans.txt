@@ -1,4 +1,5 @@
 
 * add comments with '--'
+* add `let =` syntax
 * module system
 

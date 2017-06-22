@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="style.css" type="text/css" />
+  
+  
+  <ul id='nav'>
+    <li><a href='./brie.html'>Brie</a></li>
+    <li><a href='./syntax.html'>Syntax</a></li>
+    <li><a href='./types.html'>Types</a></li>
+  </ul>
+  
+  
+  <a href='#' style='cursor:default'/><img src="./fox.gif" alt="a drawing of a fox" id='fox' /></a>
+</head>
+<body>
+<h1 id="brie-types">Brie <em>[ types ]</em></h1>
+<p>Brie's type system is <em>structural typing</em>, also known as row polymorphism.</p>
+<p>This means that Brie cares about what an object or value <em>can do</em>, not what it's exact type is.</p>
+<p>Brie does not have type signatures. Brie may look like a dynamic language, but <em>all type errors appear at compile time</em>.</p>
+<p>So what can you do in Brie?</p>
+<pre><code>define square : x [
+  x * x
+]
+square 3
+square 5.0</code></pre>
+<p>This works! Even though <code>3</code> is an integer and <code>5.0</code> is a float, they both have a <code>.times</code> method. Similarly,</p>
+<pre><code>let square = &lt;sides = 4, color = &quot;blue&quot;&gt;
+let triangle = &lt;sides = 3, color = &quot;red&quot;&gt;
+
+define print_sides : object [ print object.sides ]
+
+print_sides square  -- prints &quot;4&quot;
+print_sides triangle  -- prints &quot;3&quot;
+
+
+-- Compile time error:
+let lobster = &lt;color = &quot;red&quot;&gt;
+print_sides lobster</code></pre>
+<p>Furthermore, and this is the cool part, there is no more runtime cost to calling a method than there is to calling a function. This works because Brie only allows homogeneous lists.</p>
+<pre><code>let a = [ 2 , 2.3 ]   -- this fails</code></pre>
+<p>In order to get heterogeneous data, one must wrap each item in a polymorphic variant:</p>
+<pre><code>let a = [
+  Point &lt;x = 2, y = 3&gt;,
+  Person &lt;name = &quot;bob&quot;&gt;,
+  Number 3
+]</code></pre>
+<p>Note that <code>Point</code>, <code>Person</code>, and <code>Number</code> are not defined anywhere. They are polymorphic variants that tell the compiler it's dealing with a specific type.</p>
+<h2 id="other-languages">Other languages</h2>
+<p>Is Brie's system replicated in any other languages?</p>
+<p>Yes, several have structural typing, including OCaml, Go, and Scala.</p>
+<p>Brie is the only one, however, with type inference and a standard library that takes advantage of its structural typing.</p>
+<p>OCaml comes the closest, as it's also type-inferred and has structural types. However, OCaml very rarely uses its structural types and OCaml uses dynamic dispatch for method calls.</p>
+</body>
+</html>
