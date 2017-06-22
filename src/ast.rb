@@ -26,11 +26,11 @@ class Token
     end
   end
 
-  def inspect_types
+  def inspect_generics
     if data
-      "#{token}(#{data})" + "_#{type}"
+      "#{token}(#{data})" + "_#{generic}"
     else
-      token.inspect + "_#{type}" # do you need this?
+      token.inspect + "_#{generic}" # do you need this?
     end
   end
 
@@ -54,8 +54,8 @@ class Ast < Token
     "#{kind}#{children}"
   end
 
-  def inspect_types
-    "#{kind}[#{children.map{|x| x.inspect_types}.join(", ")}]" + "_#{type}"
+  def inspect_generics
+    "#{kind}[#{children.map{|x| x.inspect_generics}.join(", ")}]" + "_#{generic}"
   end
 
   def iterate
@@ -133,9 +133,9 @@ class Parens < Root
     "(#{inner})"
   end
 
-  def inspect_types
-    inner = @children.map {|x| x.inspect_types}.join(" ")
-    "(#{inner})_#{type}"
+  def inspect_generics
+    inner = @children.map {|x| x.inspect_generics}.join(" ")
+    "(#{inner})_#{generic}"
   end
 end
 
@@ -155,10 +155,10 @@ class Block < Ast
     "#{kind}#{arguments}#{children}"
   end
 
-  def inspect_types
-    args = arguments.map{|x| x.inspect_types}.join(", ")
-    chlds = children.map{|x| x.inspect_types}.join(", ")
-    "#{kind}[#{args}][#{chlds}]_#{type}"
+  def inspect_generics
+    args = arguments.map{|x| x.inspect_generics}.join(", ")
+    chlds = children.map{|x| x.inspect_generics}.join(", ")
+    "#{kind}[#{args}][#{chlds}]_#{generic}"
   end
 end
 
@@ -182,9 +182,9 @@ class Object_literal < Ast
     "<#{inner.join(" , ")}>"
   end
 
-  def inspect_types
-    inner = @fields.map {|name, ast| "#{name} = #{ast.inspect_types}" }
-    "<#{inner.join(" , ")}>"
+  def inspect_generics
+    inner = @fields.map {|name, ast| "#{name} = #{ast.inspect_generics}" }
+    "<#{inner.join(" , ")}>_#{generic}"
   end
 end
 

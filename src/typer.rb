@@ -9,18 +9,73 @@ require_relative './ast'
 
 Generic = Struct.new(:id, :start, :finish)
 
-class Type ; end # this type is not meant to be instantiated
 
-class Unknown < Type  ; end
+class Type
+  def ==(another)
+    return false unless another.class == self.class
+    return false unless another.instance_variables == instance_variables
+    instance_variables.each do |i|
+      if instance_variable_get(i) != another.instance_variable_get(i)
+        return false
+      end
+    end
+    true
+  end
 
-class Literal < Type ; end
+  def inspect
+    attrs = instance_variables
+      .map {|a| "#{a.to_s[1..a.to_s.length]}=#{instance_variable_get(a)}"}
+      .join(", ")
+    "#{self.class}(#{attrs})"
+  end
+end
 
-  class StringLiteral < Literal ; end
-  class IntegerLiteral < Literal ; end
+class Unknown < Type ; end
 
-class Function < Type ; end
+class Literal < Type
 
-class Open_object < Type ; end
+  attr_accessor :subtype
+
+  # valid subtypes:
+  # :integer
+  # :string
+  # :object
+
+  def initialize(subtype)
+    @subtype = subtype
+  end
+
+end
+
+class Open_object < Type
+
+  attr_accessor :fields
+
+  # .fields is a dictionary from
+  # the name of the field to it's
+  # generic. This is important
+  # because then the inference of
+  # the fields works transparently
+  # as we infer the type of the
+  # generic.
+
+  def initialize(fields)
+    @fields = fields
+  end
+
+end
+
+class Function < Type
+
+  attr_accessor :takes, :returns
+
+  def initialize(takes:, returns:)
+    @takes = takes
+    @returns = returns
+  end
+
+end
+
 
 $generic_counter = 0
 
@@ -76,6 +131,22 @@ class Typetable
     @type_mapping.map {|k, v| k.include?(type)}.any?
   end
 
+  def error_types(a, b)
+    raise "Type error: #{type} and #{constrained} conflict"
+  end
+
+  def constrain_generic(generic, constrained)
+    set, type = get_type_of_generic(generic)
+    if set.nil? and type.nil?
+      set = Set.new([generic])
+      type = Unknown.new
+    elsif set.nil? or type.nil?
+      raise "Did not prepare for this situation"
+    end
+
+    @type_mapping[set] = constrain(type, constrained)
+  end
+
   def alias_generics(a, b)
     aset, atype = get_type_of_generic(a)
     bset, btype = get_type_of_generic(b)
@@ -84,12 +155,12 @@ class Typetable
     return if aset == bset and not aset.nil?
 
     if not btype and not atype
-      @type_mapping[Set.new([a, b])] = Unknown
+      @type_mapping[Set.new([a, b])] = Unknown.new
     elsif btype and atype
       @type_mapping.delete(aset)
       @type_mapping.delete(bset)
       ctype = constrain atype btype
-      @type_mapping[a.union b] = ctype
+      @type_mapping[aset.union bset] = ctype
     else
 
       if btype
@@ -102,8 +173,32 @@ class Typetable
     end
   end
 
-  def constrain(atype, btype)
-    raise "unimplemented"
+  def constrain(type, constrained)
+    return constrained if type.class == Unknown
+    return type if constrained.class == Unknown
+    return type if type == constrained
+
+    case type.class
+    when Literal
+      # in the future, use line numbers.
+      error_types(type, constrained)
+    when Function
+      error_types(type, constrained) unless constrained.class == Function
+      alias_generics(type.takes, constrained.takes)
+      alias_generics(type.returns, constrained.returns)
+      # they are asserted to be the same by the above calls to alias_generics
+      return atype
+    when Open_object
+      error_types(type, constrained) unless constrained.class == Open_object
+      raise "unimplemented"
+      # you have to iterate over each field,
+      # construct a new Open_object that has
+      # a union of the two sets of feilds,
+      # and then call `alias_generics` for
+      # each field.
+    else
+      raise "unimplemented class #{type}"
+    end
   end
 
 end
@@ -226,6 +321,15 @@ class Typer
   private
 
     def convert_let_statements
+      # this is a tree operation that
+      # transforms 'define x 3' within a
+      # block to let_in x 3 [ ]
+      # with the rest of the lines of the block in the
+      #
+      # This means that (define x 3) + 2 or something
+      # is invalid because 'define' is just a let statement.
+      #
+      # Maybe don't do this within class definitions?
 
       @root.collect(cls: Block) do |block|
         i = 0
@@ -263,15 +367,22 @@ class Typer
         if tok.class == Token
           if tok.token == :ident and tok.data.valid_integer?
 
+            @types.constrain_generic(tok.generic, Literal.new(:integer))
+
           elsif tok.token == :string
+
+            @types.constrain_generic(tok.generic, Literal.new(:string))
 
           end
         end
       end
-
     end
 
     def constraints_for_block_literals
+
+    end
+
+    def constraints_for_object_literals
 
     end
 
