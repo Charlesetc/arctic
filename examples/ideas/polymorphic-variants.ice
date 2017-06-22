@@ -1,0 +1,23 @@
+
+-- the current construction doesn't have a way to have
+-- heterogeneous data really.
+
+-- using capital letters as tags for variants,
+-- we get heterogenous data that you can `match`
+-- against while still keeping fast object indexing.
+
+[
+
+  Assoc <x = 2 > <x = 4>,
+  Penultimate 2,
+  Last,
+
+  -- error:
+
+  Penultimate,
+
+  -- error:
+  Assoc <y = 3>
+
+]
+

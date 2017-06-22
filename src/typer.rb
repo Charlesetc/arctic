@@ -10,6 +10,9 @@ require_relative './ast'
 Generic = Struct.new(:id, :start, :finish)
 
 
+## Any type either inherits from
+# `Unknown`, `Literal`, or `Open`.
+
 class Type
   def ==(another)
     return false unless another.class == self.class
@@ -47,7 +50,21 @@ class Literal < Type
 
 end
 
-class Open_object < Type
+class Function < Literal
+
+  attr_accessor :takes, :returns
+
+  def initialize(takes:, returns:)
+    @takes = takes
+    @returns = returns
+    @subtype = :function
+  end
+
+end
+
+class Open < Type ; end
+
+class Open_object < Open
 
   attr_accessor :fields
 
@@ -65,16 +82,7 @@ class Open_object < Type
 
 end
 
-class Function < Type
-
-  attr_accessor :takes, :returns
-
-  def initialize(takes:, returns:)
-    @takes = takes
-    @returns = returns
-  end
-
-end
+class Open_function < Open ; end
 
 
 $generic_counter = 0
@@ -123,7 +131,6 @@ class Typetable
       end
     end
 
-    # it should never be nil.
     [nil, nil]
   end
 
@@ -179,16 +186,19 @@ class Typetable
     return type if type == constrained
 
     case type.class
-    when Literal
-      # in the future, use line numbers.
-      error_types(type, constrained)
     when Function
+      # you will have to change this if you ever want to make
+      # objects pass as functions
       error_types(type, constrained) unless constrained.class == Function
       alias_generics(type.takes, constrained.takes)
       alias_generics(type.returns, constrained.returns)
+    when Literal # all other literals
+      # in the future, use line numbers.
+      error_types(type, constrained)
+    when type.class == Open_function
       # they are asserted to be the same by the above calls to alias_generics
       return atype
-    when Open_object
+    when type.class == Open_object
       error_types(type, constrained) unless constrained.class == Open_object
       raise "unimplemented"
       # you have to iterate over each field,
@@ -301,12 +311,14 @@ class Typer
     # get rid of extra parentheses
 
     convert_let_statements
-
     aliases_for_names # (let statements and block arguments)
 
+    convert_function_calls
+
     constraints_for_token_literals
-    constraints_for_block_literals
     constraints_for_function_application
+
+    constraints_for_block_literals
     constraints_for_field_access
 
     @root
@@ -351,8 +363,23 @@ class Typer
 
     end
 
-    def aliases_for_names
+    def is_a_builtin?(ast)
+      [
+        is_ident(ast, "let_in"),
+      ].any?
+    end
 
+    def convert_function_calls
+
+      @root.collect(cls: Parens) do |parens|
+        length = parens.children.length
+        if length > 2 and not is_a_builtin?(parens.children[0])
+          parens.children = [parens.children[0], Parens.new(parens.children[1..length], parens.children[1])]
+        end
+      end
+    end
+
+    def aliases_for_names
       aliaser = Aliaser.new(@types)
 
       # cls: Ast by default
@@ -378,15 +405,29 @@ class Typer
       end
     end
 
+    def constraints_for_function_application
+
+      # The question: what constraints happen to the arguments?
+      # Nothing, right? Figure. it. out.
+
+      @root.collect(cls: Parens) do |parens|
+        if parens.children.length == 2 # then it's a function call.
+          @types.constrain_generic(
+            parens.children[0].generic,
+            Function.new(
+              takes: parens.children[1].generic,
+              returns: parens.generic,
+            ),
+          )
+        end
+      end
+    end
+
     def constraints_for_block_literals
 
     end
 
     def constraints_for_object_literals
-
-    end
-
-    def constraints_for_function_application
 
     end
 

@@ -25,9 +25,11 @@ def assert_aliases(text, aliases)
   +-> { pass }
 end
 
-assert_aliases(": x [ x ]", {[2,1]=>Unknown})
-assert_aliases(": x [ define x 2\n x ]", {[4,5,6,7]=>Unknown})
-assert_aliases("[ define x 2 \n : x [ x ] ]",
-               {[8,9,12]=>Unknown, [11,10]=>Unknown})
+unknown = Unknown.new
+
+assert_aliases(": x [ x ]", {[2,1]=>unknown})
+assert_aliases(": x [ define x a\n x ]", {[4,5,6,7]=>unknown})
+assert_aliases("[ define x a \n : x [ x ] ]",
+               {[8,9,12]=>unknown, [11,10]=>unknown})
 
 

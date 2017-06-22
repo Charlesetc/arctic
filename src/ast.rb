@@ -2,6 +2,7 @@
 # Token = Struct.new(:token, :data, :start, :finish)
 
 def is_ident(tok, name)
+  return false if tok.nil?
   tok.token == :ident and tok.data == name
 end
 

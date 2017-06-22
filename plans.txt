@@ -2,4 +2,5 @@
 * add comments with '--'
 * add `let =` syntax
 * module system
+* support semicolons in blocks.
 
