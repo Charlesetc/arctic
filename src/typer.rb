@@ -56,14 +56,13 @@ class Literal < Type
 
 end
 
-class Function_literal < Literal
+class Function_literal
 
   attr_accessor :takes, :returns
 
   def initialize(takes:, returns:)
     @takes = takes
     @returns = returns
-    @subtype = :function
   end
 
 end
@@ -169,9 +168,10 @@ class Typetable
     if not btype and not atype
       @type_mapping[Set.new([a, b])] = Unknown.new
     elsif btype and atype
-      @type_mapping.delete(aset)
-      @type_mapping.delete(bset)
-      ctype = constrain atype btype
+      @type_mapping.delete_if do |k, v|
+        k == aset or k == bset
+      end
+      ctype = constrain(atype, btype)
       @type_mapping[aset.union bset] = ctype
     else
 
@@ -354,7 +354,6 @@ class Typer
           next if child.class != Parens
           next if not is_ident(child.children[0], "define")
 
-          p child.children
           # construct new child
           let_in = Let_in.new(child.children[1], child.children[2], block.children[(i)..block.children.length])
 
@@ -411,22 +410,27 @@ class Typer
 
     def constraints_for_block_literals
       @root.collect(cls: Block) do |block|
-        if block.class == Block
-          last_generic = block.children.last.generic
-          block.arguments.each do
-            g = new_generic(last_generic.start, last_generic.finish)
-
-            # Make a new generic etc.
-            # @types.constrain_generic(
-            #   block.arguments
-            # )
-          end
+        last_generic = block.children.last.generic
+        block.arguments.reverse.each do |arg|
+          g = new_generic(last_generic.start, last_generic.finish)
+          @types.constrain_generic(
+            g,
+            Function_literal.new(
+              takes:arg.generic,
+              returns:last_generic,
+            )
+          )
+          last_generic = g
         end
+        @types.alias_generics(block.generic, last_generic)
       end
     end
 
     def constraints_for_object_literals
+      @root.collect(cls: Object_literal) do |object|
 
+
+      end
     end
 
     def constraints_for_field_access
