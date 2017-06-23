@@ -303,6 +303,10 @@ end
 class Typer
 
   def initialize(root)
+    # blame me if you want
+    # but don't take it out
+    # on my friends:
+    $generic_counter = 0
     @root = root
 
     @types = Typetable.new
@@ -403,6 +407,11 @@ class Typer
           @types.constrain_generic(
             parens.children[0].generic,
             Open_function,
+          )
+        elsif parens.children.length == 1
+          @types.alias_generics(
+            parens.children[0].generic,
+            parens.generic,
           )
         end
       end
