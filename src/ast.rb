@@ -168,7 +168,7 @@ class Block < Ast
   end
 end
 
-class Let_in < Ast
+class Let_in < Block
   attr_reader :name, :value
 
   def initialize(name_tok, value, children)
@@ -182,7 +182,7 @@ class Let_in < Ast
   end
 
   def inspect
-    "let_in #{name} #{value} #{children}"
+    "let_in #{name} #{value.inspect} #{children}"
   end
 
   def inspect_generics

@@ -1,5 +1,5 @@
 [
   define x 3
   : x [ x a ]
-  x 
+  x
 ]

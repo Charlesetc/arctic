@@ -410,25 +410,26 @@ class Typer
 
     def constraints_for_block_literals
       @root.collect(cls: Block) do |block|
-        last_generic = block.children.last.generic
-        block.arguments.reverse.each do |arg|
-          g = new_generic(last_generic.start, last_generic.finish)
-          @types.constrain_generic(
-            g,
-            Function_literal.new(
-              takes:arg.generic,
-              returns:last_generic,
+        if block.class == Block
+          last_generic = block.children.last.generic
+          block.arguments.reverse.each do |arg|
+            g = new_generic(last_generic.start, last_generic.finish)
+            @types.constrain_generic(
+              g,
+              Function_literal.new(
+                takes:arg.generic,
+                returns:last_generic,
+              )
             )
-          )
-          last_generic = g
+            last_generic = g
+          end
+          @types.alias_generics(block.generic, last_generic)
         end
-        @types.alias_generics(block.generic, last_generic)
       end
     end
 
     def constraints_for_object_literals
       @root.collect(cls: Object_literal) do |object|
-
 
       end
     end
