@@ -7,8 +7,14 @@ require_relative './ast'
 # Types
 #
 
-Generic = Struct.new(:id, :start, :finish)
-
+class Generic < Struct.new(:id, :start, :finish)
+  def to_s
+    id.to_s
+  end
+  def inspect
+    to_s
+  end
+end
 
 ## Any type either inherits from
 # `Unknown`, `Literal`, or `Open`.
@@ -50,7 +56,7 @@ class Literal < Type
 
 end
 
-class Function < Literal
+class Function_literal < Literal
 
   attr_accessor :takes, :returns
 
@@ -62,9 +68,9 @@ class Function < Literal
 
 end
 
-class Open < Type ; end
+class Open_function < Type ; end
 
-class Open_object < Open
+class Open_object < Type
 
   attr_accessor :fields
 
@@ -82,16 +88,15 @@ class Open_object < Open
 
 end
 
-class Open_function < Open ; end
 
 
 $generic_counter = 0
 
 def new_generic(start, finish)
-  Generic.new($generic_counter, start, finish)
+  g = Generic.new($generic_counter, start, finish)
   $generic_counter += 1
+  g
 end
-
 
 #
 # Ast
@@ -186,19 +191,22 @@ class Typetable
     return type if type == constrained
 
     case type.class
-    when Function
+    when Function_literal
+      return type if constrained.class == Open_function
       # you will have to change this if you ever want to make
       # objects pass as functions
+
+      raise "I don't think logic should get here."
       error_types(type, constrained) unless constrained.class == Function
       alias_generics(type.takes, constrained.takes)
       alias_generics(type.returns, constrained.returns)
+      return type ## ?
+    when Open_function
+      return constrain(constrained, type) # Basically only works with Function_literal
     when Literal # all other literals
       # in the future, use line numbers.
       error_types(type, constrained)
-    when type.class == Open_function
-      # they are asserted to be the same by the above calls to alias_generics
-      return atype
-    when type.class == Open_object
+    when Open_object
       error_types(type, constrained) unless constrained.class == Open_object
       raise "unimplemented"
       # you have to iterate over each field,
@@ -363,12 +371,6 @@ class Typer
 
     end
 
-    def is_a_builtin?(ast)
-      [
-        is_ident(ast, "let_in"),
-      ].any?
-    end
-
     def convert_function_calls
 
       @root.collect(cls: Parens) do |parens|
@@ -393,38 +395,37 @@ class Typer
       @root.collect(cls: Token) do |tok|
         if tok.class == Token
           if tok.token == :ident and tok.data.valid_integer?
-
             @types.constrain_generic(tok.generic, Literal.new(:integer))
-
           elsif tok.token == :string
-
             @types.constrain_generic(tok.generic, Literal.new(:string))
-
           end
         end
       end
     end
 
     def constraints_for_function_application
-
-      # The question: what constraints happen to the arguments?
-      # Nothing, right? Figure. it. out.
-
       @root.collect(cls: Parens) do |parens|
-        if parens.children.length == 2 # then it's a function call.
+        if is_a_function_call?(parens)
           @types.constrain_generic(
             parens.children[0].generic,
-            Function.new(
-              takes: parens.children[1].generic,
-              returns: parens.generic,
-            ),
+            Open_function,
           )
         end
       end
     end
 
     def constraints_for_block_literals
+      @root.collect(cls: Block) do |block|
+        last_generic = block.children.last.generic
+        block.arguments.each do
+          g = new_generic(last_generic.start, last_generic.finish)
 
+          # Make a new generic etc.
+          # @types.constrain_generic(
+          #   block.arguments
+          # )
+        end
+      end
     end
 
     def constraints_for_object_literals
@@ -433,6 +434,20 @@ class Typer
 
     def constraints_for_field_access
 
+    end
+
+
+    # Helpers
+
+    def is_a_builtin?(ast)
+      [
+        is_ident(ast, "let_in"),
+      ].any?
+    end
+
+
+    def is_a_function_call?(parens)
+      parens.children.length == 2 and not is_a_builtin?(parens.children[0])
     end
 
 end
