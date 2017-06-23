@@ -56,7 +56,7 @@ class Literal < Type
 
 end
 
-class Function_literal
+class Function_literal < Type
 
   attr_accessor :takes, :returns
 
