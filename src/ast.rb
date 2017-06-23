@@ -94,6 +94,11 @@ class Ast < Token
         rest << Separator.new(ast, post)
         ast.all_iterables { |a| rest << a }
       end
+
+      # also iterate over let_in values
+      if ast.is_a?(Let_in)
+        rest << ast.value
+      end
     end
   end
 
@@ -162,6 +167,31 @@ class Block < Ast
     "#{kind}[#{args}][#{chlds}]_#{generic}"
   end
 end
+
+class Let_in < Block
+  attr_reader :name, :value
+
+  def initialize(name_tok, value, children)
+    @children = children
+    @name = name_tok.data
+    @value = value
+    @kind = :let_in
+
+    @start = name_tok.start
+    @finish = (children.last || name_tok).finish
+  end
+
+  def inspect
+    "let_in #{name} #{value} #{children}"
+  end
+
+  def inspect_generics
+    chlds = children.map{|x| x.inspect_generics}.join(", ")
+
+    "let_in(#{name} #{value.inspect_generics} #{chlds})_#{generic}"
+  end
+end
+
 
 class Object_literal < Ast
   attr_reader :fields

@@ -250,25 +250,20 @@ class Aliaser
 
       aliased(a)
 
-      return unless is_let_in(a) or a.is_a?(Block)
+      return unless a.is_a?(Block)
       drop
     end
   end
 
-  def is_let_in(ast)
-    ast.is_a?(Parens) and
-      is_ident(ast.children[0], "let_in")
-  end
-
   def record_let(ast)
-    return unless is_let_in(ast)
+    return unless ast.is_a?(Let_in)
+    @types.alias_generics(ast.generic, ast.value.generic)
 
-    @types.alias_generics(ast.generic, ast.children[2].generic)
-    add({ast.children[1].data => ast.generic})
+    add({ast.name => ast.generic})
   end
 
   def record_block(ast)
-    return unless ast.is_a?(Block)
+    return unless ast.class == Block
 
     arguments = ast.arguments.map do |a|
       [a.data, a.generic]
@@ -359,23 +354,23 @@ class Typer
           next if child.class != Parens
           next if not is_ident(child.children[0], "define")
 
+          p child.children
           # construct new child
-          new_scope = Block.new(block.children[(i)..block.children.length] || [], [], child)
-          child.children << new_scope
-          child.children[0].data = 'let_in'
+          let_in = Let_in.new(child.children[1], child.children[2], block.children[(i)..block.children.length])
 
           # ignore the rest of the children
-          block.children = block.children[0..(i-1)]
+          block.children = block.children[0...i-1]
+          # add back in new child
+          block.children << let_in
         end
       end
 
     end
 
     def convert_function_calls
-
       @root.collect(cls: Parens) do |parens|
         length = parens.children.length
-        if length > 2 and not is_a_builtin?(parens.children[0])
+        if length > 2
           parens.children = [parens.children[0], Parens.new(parens.children[1..length], parens.children[1])]
         end
       end
@@ -405,7 +400,7 @@ class Typer
 
     def constraints_for_function_application
       @root.collect(cls: Parens) do |parens|
-        if is_a_function_call?(parens)
+        if parens.children.length == 2
           @types.constrain_generic(
             parens.children[0].generic,
             Open_function,
@@ -416,14 +411,16 @@ class Typer
 
     def constraints_for_block_literals
       @root.collect(cls: Block) do |block|
-        last_generic = block.children.last.generic
-        block.arguments.each do
-          g = new_generic(last_generic.start, last_generic.finish)
+        if block.class == Block
+          last_generic = block.children.last.generic
+          block.arguments.each do
+            g = new_generic(last_generic.start, last_generic.finish)
 
-          # Make a new generic etc.
-          # @types.constrain_generic(
-          #   block.arguments
-          # )
+            # Make a new generic etc.
+            # @types.constrain_generic(
+            #   block.arguments
+            # )
+          end
         end
       end
     end
@@ -434,20 +431,6 @@ class Typer
 
     def constraints_for_field_access
 
-    end
-
-
-    # Helpers
-
-    def is_a_builtin?(ast)
-      [
-        is_ident(ast, "let_in"),
-      ].any?
-    end
-
-
-    def is_a_function_call?(parens)
-      parens.children.length == 2 and not is_a_builtin?(parens.children[0])
     end
 
 end
