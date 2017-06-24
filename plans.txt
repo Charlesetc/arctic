@@ -1,7 +1,16 @@
 
-* add comments with '--'
+# Features
+
 * add `let =` syntax
+* if statements
+* while statements
 * parse floats correctly
 * module system
 * support semicolons in blocks.
+
+# Roadmap
+
+* Typechecking
+
+* Eventually compile to OCaml subset
 

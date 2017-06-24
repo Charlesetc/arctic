@@ -16,6 +16,10 @@ class Tokenizer
     @text[@index]
   end
 
+  def peek
+    @text[@index+1]
+  end
+
   def advance
     @index += 1
   end
@@ -79,6 +83,12 @@ class Tokenizer
       when (char == ' ' or char == "\t")
         advance
         @last = @index
+      when (char == '-' and peek == '-')
+        until done? or char == "\n"
+          advance
+        end
+        advance
+        save :newline
       else
         ident = read_ident
         save :ident, data: ident
