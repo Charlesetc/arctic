@@ -143,7 +143,7 @@ class Typetable
   end
 
   def error_types(a, b)
-    raise "Type error: #{type} and #{constrained} conflict"
+    raise "Type error: #{a.inspect} and #{b.inspect} conflict"
   end
 
   def constrain_generic(generic, constrained)
@@ -180,8 +180,14 @@ class Typetable
         atype, btype = btype, atype
         a, b = b, a
       end
-      # now atype is not nil
-      aset << b
+      begin
+        # quite understandably,
+        # you can't mutate the
+        # keys of a hash in place.
+        v = @type_mapping.delete aset
+        aset << b
+        @type_mapping[aset] = v
+      end
     end
   end
 
@@ -190,8 +196,10 @@ class Typetable
     return type if constrained.class == Unknown
     return type if type == constrained
 
-    case type.class
-    when Function_literal
+    case ## Why the actual **** does this fail
+         ## using type.class here on
+         ## literal_and_open_function.brie?
+    when type.class == Function_literal
       return type if constrained.class == Open_function
       # you will have to change this if you ever want to make
       # objects pass as functions
@@ -201,12 +209,12 @@ class Typetable
       alias_generics(type.takes, constrained.takes)
       alias_generics(type.returns, constrained.returns)
       return type ## ?
-    when Open_function
+    when type.class == Open_function
       return constrain(constrained, type) # Basically only works with Function_literal
-    when Literal # all other literals
+    when type.class == Literal # all other literals
       # in the future, use line numbers.
       error_types(type, constrained)
-    when Open_object
+    when type.class == Open_object
       error_types(type, constrained) unless constrained.class == Open_object
       raise "unimplemented"
       # you have to iterate over each field,
@@ -215,7 +223,7 @@ class Typetable
       # and then call `alias_generics` for
       # each field.
     else
-      raise "unimplemented class #{type}"
+      raise "unimplemented class #{type.class}"
     end
   end
 

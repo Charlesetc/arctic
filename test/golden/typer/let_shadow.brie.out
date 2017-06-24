@@ -1,1 +1,1 @@
-{[1, 2, 5, 7]=>Literal(subtype=integer), [3, 4]=>Literal(subtype=string), [6, 0]=>Open_function, [8, 9]=>Function_literal(takes=0, returns=1)}
+{[3, 4]=>Literal(subtype=string), [6, 0]=>Open_function, [1, 2, 5, 7]=>Literal(subtype=integer), [8, 9]=>Function_literal(takes=0, returns=1)}
