@@ -65,13 +65,13 @@ class Ast < Token
   end
 
   def all_iterables(&block)
-    @children.each(&block)
+    @children.map(&block)
   end
 
   def collect(cls: Ast, post:nil)
     yield self if self.is_a?(cls)
 
-    rest = self.children.clone
+    rest = self.all_iterables { |x| x }
     until rest.empty?
       ast = rest.pop
 
@@ -206,7 +206,7 @@ class Object_literal < Ast
   end
 
   def all_iterables
-    @fields.each {|_name, ast| yield ast }
+    @fields.map {|_name, ast| yield ast }
   end
 
   def inspect

@@ -67,6 +67,15 @@ class Function_literal < Type
 
 end
 
+class Closed_object < Type
+
+  attr_accessor :fields
+
+  def initialize(fields)
+    @fields = fields
+  end
+end
+
 class Open_function < Type ; end
 
 class Open_object < Type
@@ -84,7 +93,6 @@ class Open_object < Type
   def initialize(fields)
     @fields = fields
   end
-
 end
 
 
@@ -332,8 +340,9 @@ class Typer
 
     constraints_for_token_literals
     constraints_for_function_application
-
     constraints_for_block_literals
+
+    constraints_for_object_literals
     constraints_for_field_access
 
     @root
@@ -447,7 +456,13 @@ class Typer
 
     def constraints_for_object_literals
       @root.collect(cls: Object_literal) do |object|
-
+        fields = object.fields.map do |k, v|
+          [k, v.generic]
+        end.to_h
+        @types.constrain_generic(
+          object.generic,
+          Closed_object.new(fields)
+        )
       end
     end
 
