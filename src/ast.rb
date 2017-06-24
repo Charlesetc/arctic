@@ -144,12 +144,16 @@ class Dot_access < Root
     @finish = name_tok.finish
   end
 
+  def child
+    @children[0]
+  end
+
   def inspect
-    "#{@children[0].inspect}.#{name}"
+    "#{child.inspect}.#{name}"
   end
 
   def inspect_generics
-    "#{@children[0].inspect_generics}.#{name}_#{generic}"
+    "#{child.inspect_generics}.#{name}_#{generic}"
   end
 end
 

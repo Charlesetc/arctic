@@ -1,0 +1,2 @@
+[ define f 2
+  (f a).that ]

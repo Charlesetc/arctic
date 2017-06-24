@@ -18,7 +18,11 @@ end
 def check(suite)
   Dir.glob("golden/#{suite}/*.brie") do |filename|
     out = self.send(suite, File.read(filename))
-    expected = File.read(filename + ".out").chomp
+    begin
+      expected = File.read(filename + ".out").chomp
+    rescue
+      expected = "FILE NOT FOUND"
+    end
     if out != expected
       puts "expected: " + expected
       puts "got:      " + out
@@ -45,7 +49,7 @@ when 'record'
   suites.each do |suite|
     record suite
   end
-when 'test'
+when 'check'
   suites.each do |suite|
     puts "#{suite}:"
     check suite

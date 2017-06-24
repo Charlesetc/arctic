@@ -487,8 +487,13 @@ class Typer
     end
 
     def constraints_for_field_access
+      @root.collect(cls: Dot_access) do |dotted|
 
-
+        @types.constrain_generic(
+          dotted.child.generic,
+          Open_object.new({dotted.name => dotted.generic})
+        )
+      end
     end
 
 end
