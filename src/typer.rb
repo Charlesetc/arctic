@@ -248,8 +248,9 @@ class Typetable
         error_types(type, constrained) unless type.fields[k]
         alias_generics(type.fields[k], v)
       end
+      type
     else
-      raise "unimplemented class #{type.class}"
+      raise "I don't know how to constrain this class: #{type.class}"
     end
   end
 

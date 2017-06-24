@@ -1,0 +1,1 @@
+{[2, 3]=>Closed_object(fields={"name"=>11}), [8, 11]=>Literal(subtype=string), [0, 1, 4, 5, 16]=>Closed_object(fields={"name"=>10, "style"=>9}), [6, 9, 12, 13]=>Literal(subtype=integer), [7, 10, 14, 15]=>Literal(subtype=integer)}

@@ -1,0 +1,4 @@
+[
+  define x <name = 2>
+  x.not_name
+]

@@ -1,0 +1,7 @@
+[
+  define bob <name = 2 , style = 3>
+  bob.name
+  bob.style
+
+  define bob <name = "Hi">
+]

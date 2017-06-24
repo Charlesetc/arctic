@@ -12,4 +12,5 @@ ast = ty.produce_ast
 
 puts ty.stringify_types
 
+puts
 puts ast.inspect_generics
