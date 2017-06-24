@@ -223,13 +223,31 @@ class Typetable
       # in the future, use line numbers.
       error_types(type, constrained)
     when type.class == Open_object
+      if constrained.class == Open_object
+        # merge, alias on duplicates:
+        new_fields = type.fields.clone
+        constrained.fields.map do |k, v|
+          if new_fields[k]
+            alias_generics(new_fields[k], v)
+          else
+            new_fields[k] = v
+          end
+        end
+        return Open_object.new(new_fields)
+      else
+        # Either error or go to Closed_object
+        return constrain(constrained, type)
+      end
+    when type.class == Closed_object
       error_types(type, constrained) unless constrained.class == Open_object
-      raise "unimplemented"
-      # you have to iterate over each field,
-      # construct a new Open_object that has
-      # a union of the two sets of feilds,
-      # and then call `alias_generics` for
-      # each field.
+
+      # I think aliasing is the right move here.
+      constrained.fields.each do |k, v|
+        # you can make this a better error message
+        # in the future:
+        error_types(type, constrained) unless type.fields[k]
+        alias_generics(type.fields[k], v)
+      end
     else
       raise "unimplemented class #{type.class}"
     end
@@ -335,7 +353,6 @@ class Typer
 
     convert_let_statements
     aliases_for_names # (let statements and block arguments)
-
     convert_function_calls
 
     constraints_for_token_literals
@@ -391,7 +408,10 @@ class Typer
       @root.collect(cls: Parens) do |parens|
         length = parens.children.length
         if length > 2
-          parens.children = [parens.children[0], Parens.new(parens.children[1..length], parens.children[1])]
+          parens.children = [
+            Parens.new(parens.children[0...length-1],parens.children[1]),
+            parens.children[length-1],
+          ]
         end
       end
     end
@@ -467,6 +487,7 @@ class Typer
     end
 
     def constraints_for_field_access
+
 
     end
 

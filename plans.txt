@@ -1,6 +1,7 @@
 
 * add comments with '--'
 * add `let =` syntax
+* parse floats correctly
 * module system
 * support semicolons in blocks.
 

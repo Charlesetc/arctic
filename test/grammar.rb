@@ -11,10 +11,15 @@ end
 
 $i = 0
 def compare(input, *expected)
-  $i += 1
-  expected = "root[#{expected.join(", ")}]"
-  found = ast(input).inspect
-  passed = found == expected
+  begin
+    $i += 1
+    expected = "root[#{expected.join(", ")}]"
+    found = ast(input).inspect
+    passed = found == expected
+  rescue
+    p "FAILED WITH EXCEPTION"
+    passed = false
+  end
 
   if not passed and  ENV['debug'] and ($i / 10) == ENV['debug'].to_i
     p expected
@@ -67,6 +72,11 @@ compare "<x = (f a)>", "<x = ((:ident(f) :ident(a)))>"
 +-> { compare "(3 - 1 * 2)", "(:ident(-) (:ident(3)) (:ident(*) (:ident(1)) (:ident(2))))" }
 +-> { compare "(this and that or not)", "(:ident(or) (:ident(and) (:ident(this)) (:ident(that))) (:ident(not)))" }
 
+# Dot access
+
++-> { compare "this.that", ":ident(this).that" }
++-> { compare "this.that.cool", ":ident(this).that.cool" }
++-> { compare "(2 + 2).cool", "(:ident(+) (:ident(2)) (:ident(2))).cool" }
 
 # Line numbers
 

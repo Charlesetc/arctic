@@ -64,6 +64,10 @@ class Ast < Token
     # only used in Parens
   end
 
+  def iterate_follow
+    # again nothing
+  end
+
   def all_iterables(&block)
     @children.map(&block)
   end
@@ -123,6 +127,30 @@ class Root < Ast
     @children.select! {|c| not c.nil?}
   end
 
+  def iterate_follow
+    yield
+    @children.select! {|c| not c.nil?}
+  end
+
+end
+
+class Dot_access < Root
+  attr_reader :name
+
+  def initialize(name_tok, child)
+    @children = [child]
+    @name = name_tok.data
+    @start = child.start
+    @finish = name_tok.finish
+  end
+
+  def inspect
+    "#{@children[0].inspect}.#{name}"
+  end
+
+  def inspect_generics
+    "#{@children[0].inspect_generics}.#{name}_#{generic}"
+  end
 end
 
 class Parens < Root

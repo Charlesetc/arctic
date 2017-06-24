@@ -127,6 +127,10 @@ class Grammar
     end
 
     collect do |x|
+      dot_access x
+    end
+
+    collect do |x|
       binary_operator(x, ["or"])
     end
     collect do |x|
@@ -315,6 +319,28 @@ class Grammar
     raise 'Got unexpected open angle bracket' if count != 0
   end
 
+  def dot_access(ast)
+    last_child = nil
+    # This basically looks ahead one for the
+    # dot token and then wraps the last one
+    # if it's there.
+    ast.iterate do |child|
+
+      if child.token == :dotaccess
+        child = Dot_access.new(child, last_child)
+        last_child = nil
+      end
+
+      last = last_child
+      last_child = child
+      last
+    end
+    # don't forget the last one
+    ast.iterate_follow do
+      ast.children << last_child
+    end
+  end
+
   # this is doable.
   # search for a plus or minus.
   # If it's there, divide the symbols
@@ -338,21 +364,23 @@ class Grammar
       child
     end
 
-    return unless index
-    return if index == 0
+    ast.iterate_follow do
+      return unless index
+      return if index == 0
 
-    length = ast.children.length
-    if index == length - 1
-      error_ast(ast, "Found operator without right side")
+      length = ast.children.length
+      if index == length - 1
+        error_ast(ast, "Found operator without right side")
+      end
+
+      left = ast.children[0..index-1]
+      right = ast.children[index+1..length]
+      ast.children = [
+        ast.children[index],
+        Parens.new(left, ast),
+        Parens.new(right, ast),
+      ]
     end
-
-    left = ast.children[0..index-1]
-    right = ast.children[index+1..length]
-    ast.children = [
-      ast.children[index],
-      Parens.new(left, ast),
-      Parens.new(right, ast),
-    ]
   end
 end
 
