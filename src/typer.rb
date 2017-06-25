@@ -237,7 +237,7 @@ class Typetable
       return type ## ?
     when type.class == Open_function
       if constrained.class == Open_function
-        alias_generics(type.takes, constrained.takes)
+        # alias_generics(type.takes, constrained.takes)
         alias_generics(type.returns, constrained.returns)
         return type
       elsif constrained.class == Function_literal

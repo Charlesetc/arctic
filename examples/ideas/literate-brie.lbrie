@@ -1,0 +1,13 @@
+
+It could be cool if there was built-in support
+for literate programming in brie. It would have
+to give the right line numbers for the file,
+which would be awesome and not that hard.
+
+Actually I think this would be great.
+
+Imagine requiring a file that ends in .lbrie,
+and having the compiler transparently ignore.
+
+I think this could mostly be done with macros,
+after they exist and it's been bootstrapped.

@@ -20,3 +20,20 @@
 
 * Eventually compile to OCaml subset
 
+# Problems
+
+## Function returns
+
+One problem I'm having to think about is how to preserve the data
+known about objects when they are passed to a function, and then returned later on.
+
+For example:
+
+```
+define id : a [ a ]
+
+(id < hi = "you" >).hi
+(id < bye = "you" >).bye
+```
+
+Not sure here...
