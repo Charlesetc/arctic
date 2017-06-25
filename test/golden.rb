@@ -34,11 +34,11 @@ end
 ## Suite runners
 def typer(input)
   t = Tokenizer.new(input)
-  g = Grammar.new(t.tokens)
-  ty = Typer.new(g.produce_ast)
-  ty.produce_ast
+  ast = Grammar.new(t.tokens).produce_ast
+  typer = Typer.new(ast)
+  typer.unification
 
-  ty.stringify_types
+  typer.stringify_types
 end
 
 

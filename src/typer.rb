@@ -264,7 +264,7 @@ end
 class Aliaser
 
   def initialize(types)
-    @types = types
+    @typetable = types
     @names = []
   end
 
@@ -292,7 +292,7 @@ class Aliaser
 
   def record_let(ast)
     return unless ast.is_a?(Let_in)
-    @types.alias_generics(ast.generic, ast.value.generic)
+    @typetable.alias_generics(ast.generic, ast.value.generic)
 
     add({ast.name => ast.generic})
   end
@@ -321,9 +321,9 @@ class Aliaser
       # but aliases_for_names is a very important function, and no other typing
       # things really make sense without having the names taken care of...
       # so it's reasonable to expect this to be the first one.
-      if (generic = get(tok.data)) and not @types.already_has(tok.generic)
+      if (generic = get(tok.data)) and not @typetable.already_has(tok.generic)
         # puts "HI " + tok.to_s
-        @types.alias_generics(tok.generic, generic)
+        @typetable.alias_generics(tok.generic, generic)
       end
     end
 
@@ -344,10 +344,10 @@ class Typer
     $generic_counter = 0
     @root = root
 
-    @types = Typetable.new
+    @typetable = Typetable.new
   end
 
-  def produce_ast
+  def unification
 
     # clean up tree first!
     # get rid of extra parentheses
@@ -363,11 +363,11 @@ class Typer
     constraints_for_object_literals
     constraints_for_field_access
 
-    @root
+    @typetable
   end
 
   def stringify_types
-    @types.type_mapping.map do |k, v|
+    @typetable.type_mapping.map do |k, v|
       [k.to_a, v]
     end.to_h.inspect
   end
@@ -418,7 +418,7 @@ class Typer
     end
 
     def aliases_for_names
-      aliaser = Aliaser.new(@types)
+      aliaser = Aliaser.new(@typetable)
 
       # cls: Ast by default
       @root.collect(post: aliaser.post) do |ast|
@@ -431,9 +431,9 @@ class Typer
       @root.collect(cls: Token) do |tok|
         if tok.class == Token
           if tok.token == :ident and tok.data.valid_integer?
-            @types.constrain_generic(tok.generic, Literal.new(:integer))
+            @typetable.constrain_generic(tok.generic, Literal.new(:integer))
           elsif tok.token == :string
-            @types.constrain_generic(tok.generic, Literal.new(:string))
+            @typetable.constrain_generic(tok.generic, Literal.new(:string))
           end
         end
       end
@@ -442,12 +442,12 @@ class Typer
     def constraints_for_function_application
       @root.collect(cls: Parens) do |parens|
         if parens.children.length == 2
-          @types.constrain_generic(
+          @typetable.constrain_generic(
             parens.children[0].generic,
             Open_function,
           )
         elsif parens.children.length == 1
-          @types.alias_generics(
+          @typetable.alias_generics(
             parens.children[0].generic,
             parens.generic,
           )
@@ -461,7 +461,7 @@ class Typer
           last_generic = block.children.last.generic
           block.arguments.reverse.each do |arg|
             g = new_generic(last_generic.start, last_generic.finish)
-            @types.constrain_generic(
+            @typetable.constrain_generic(
               g,
               Function_literal.new(
                 takes:arg.generic,
@@ -470,7 +470,7 @@ class Typer
             )
             last_generic = g
           end
-          @types.alias_generics(block.generic, last_generic)
+          @typetable.alias_generics(block.generic, last_generic)
         end
       end
     end
@@ -480,7 +480,7 @@ class Typer
         fields = object.fields.map do |k, v|
           [k, v.generic]
         end.to_h
-        @types.constrain_generic(
+        @typetable.constrain_generic(
           object.generic,
           Closed_object.new(fields)
         )
@@ -490,7 +490,7 @@ class Typer
     def constraints_for_field_access
       @root.collect(cls: Dot_access) do |dotted|
 
-        @types.constrain_generic(
+        @typetable.constrain_generic(
           dotted.child.generic,
           Open_object.new({dotted.name => dotted.generic})
         )

@@ -1,16 +1,19 @@
 
 require_relative './grammar'
 require_relative './typer'
+require_relative './verifier'
 
 t = Tokenizer.new(ARGF.read.chomp)
 
-g = Grammar.new(t.tokens)
+ast = Grammar.new(t.tokens).produce_ast
 
-ty = Typer.new(g.produce_ast)
+# ast also gets mutated
+typer = Typer.new(ast)
+typetable = typer.unification
+# puts typer.stringify_types
 
-ast = ty.produce_ast
-
-puts ty.stringify_types
+verifier = Verifier.new(ast, typetable)
+verifier.verify
 
 puts
 puts ast.inspect_generics
