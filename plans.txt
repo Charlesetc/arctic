@@ -8,9 +8,11 @@
 * module system
 * support semicolons in blocks.
 
-# Roadmap
+# Bugs
 
-* Typechecking
+* Preserve numbers for alias_generics
+
+# Roadmap
 
 * Eventually compile to OCaml subset
 

@@ -17,6 +17,7 @@ end
 
 def check(suite)
   Dir.glob("golden/#{suite}/*.brie") do |filename|
+    print "  #{File.basename(filename, ".brie")} -- "
     out = self.send(suite, File.read(filename))
     begin
       expected = File.read(filename + ".out").chomp

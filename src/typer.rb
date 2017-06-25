@@ -76,7 +76,8 @@ class Closed_object < Type
   end
 end
 
-class Open_function < Type ; end
+class Open_function < Function_literal
+end
 
 class Open_object < Type
 
@@ -146,15 +147,7 @@ class Typetable
     [nil, nil]
   end
 
-  def already_has(type)
-    @type_mapping.map {|k, v| k.include?(type)}.any?
-  end
-
-  def error_types(a, b)
-    raise "Type error: #{a.inspect} and #{b.inspect} conflict"
-  end
-
-  def constrain_generic(generic, constrained)
+  def get_type_or_unknown(generic)
     set, type = get_type_of_generic(generic)
     if set.nil? and type.nil?
       set = Set.new([generic])
@@ -162,6 +155,20 @@ class Typetable
     elsif set.nil? or type.nil?
       raise "Did not prepare for this situation"
     end
+    [set, type]
+  end
+
+  def already_has(type)
+    @type_mapping.map {|k, v| k.include?(type)}.any?
+  end
+
+  def error_types(a, b)
+    # in the future, use line numbers.
+    raise "Type error: #{a.inspect} and #{b.inspect} conflict"
+  end
+
+  def constrain_generic(generic, constrained)
+    set, type = get_type_or_unknown(generic)
 
     @type_mapping[set] = constrain(type, constrained)
   end
@@ -199,6 +206,7 @@ class Typetable
     end
   end
 
+  # Refactor this into a nice class-based system.
   def constrain(type, constrained)
     return constrained if type.class == Unknown
     return type if constrained.class == Unknown
@@ -208,19 +216,36 @@ class Typetable
          ## using type.class here on
          ## literal_and_open_function.brie?
     when type.class == Function_literal
-      return type if constrained.class == Open_function
-      # you will have to change this if you ever want to make
-      # objects pass as functions
+
+      if constrained.class == Open_function
+        # I'm saying:
+          # Whatever was previously called in this function
+          # has to be able to be reconciled with the literal.
+        _, argument_type = get_type_or_unknown(type.takes)
+        constrain_generic(constrained.takes, argument_type)
+
+        alias_generics(type.returns, constrained.returns)
+        return type
+      end
 
       raise "I don't think logic should get here."
-      error_types(type, constrained) unless constrained.class == Function
+      # you will have to change this if you ever want to make
+      # objects pass as functions
+      error_types(type, constrained) unless constrained.class == Function_literal
       alias_generics(type.takes, constrained.takes)
       alias_generics(type.returns, constrained.returns)
       return type ## ?
     when type.class == Open_function
-      return constrain(constrained, type) # Basically only works with Function_literal
+      if constrained.class == Open_function
+        alias_generics(type.takes, constrained.takes)
+        alias_generics(type.returns, constrained.returns)
+        return type
+      elsif constrained.class == Function_literal
+        return constrain(constrained, type) # Basically only works with Function_literal
+      else
+        error_types(type, constrained)
+      end
     when type.class == Literal # all other literals
-      # in the future, use line numbers.
       error_types(type, constrained)
     when type.class == Open_object
       if constrained.class == Open_object
@@ -359,6 +384,7 @@ class Typer
     constraints_for_token_literals
     constraints_for_function_application
     constraints_for_block_literals
+    # constraints_for_function_returns
 
     constraints_for_object_literals
     constraints_for_field_access
@@ -444,7 +470,10 @@ class Typer
         if parens.children.length == 2
           @typetable.constrain_generic(
             parens.children[0].generic,
-            Open_function,
+            Open_function.new(
+              takes: parens.children[1].generic,
+              returns: parens.generic,
+            )
           )
         elsif parens.children.length == 1
           @typetable.alias_generics(
@@ -473,6 +502,43 @@ class Typer
           @typetable.alias_generics(block.generic, last_generic)
         end
       end
+    end
+
+    def constraints_for_function_returns
+
+      post = lambda do |parens|
+        # we only care about function application
+        if parens.children.length == 2
+          # The function's type is not being
+          # constrained here.
+          # But! The parens' value is constrained
+          # to work with the function's return.
+
+
+          _, type = @typetable.get_type_of_generic(parens.children[0].generic)
+          raise "Expected function" unless [Function_literal, Open_function].include? type.class
+
+          _, return_type = @typetable.get_type_of_generic(type.returns)
+
+          # NOTE: This theoretically makes two entries in the
+          # table for the same (i.e. integer) type.
+          # However, it makes sense to have two entries for
+          # open objects.
+          #
+          # Should I copy the types if it's a function or
+          # object? \_(*,*)_/ Who knows!
+          @typetable.constrain_generic(
+            parens.generic,
+            return_type
+          )
+
+        end
+
+      end
+
+      @root.collect(post: post, cls: Parens) do |parens|
+      end
+
     end
 
     def constraints_for_object_literals

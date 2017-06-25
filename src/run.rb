@@ -10,7 +10,7 @@ ast = Grammar.new(t.tokens).produce_ast
 # ast also gets mutated
 typer = Typer.new(ast)
 typetable = typer.unification
-# puts typer.stringify_types
+puts typer.stringify_types
 
 verifier = Verifier.new(ast, typetable)
 verifier.verify

@@ -1,0 +1,1 @@
+{[6]=>Literal(subtype=integer), [5, 7]=>Literal(subtype=integer), [10, 8]=>Function_literal(takes=3, returns=7), [0, 1, 4, 9, 11]=>Function_literal(takes=2, returns=10)}
