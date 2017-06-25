@@ -99,7 +99,8 @@ class Tokenizer
   end
 
   def read_ident
-    store = ''
+    store = char
+    advance
     until done? or BREAK.include?(char)
       store += char
       advance

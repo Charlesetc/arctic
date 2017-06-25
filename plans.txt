@@ -1,12 +1,16 @@
 
 # Features
 
+* module system
+
+# Parsing
+
 * add `let =` syntax
 * if statements
 * while statements
-* parse floats correctly
-* module system
 * support semicolons in blocks.
+* parse floats correctly
+* 'define' can take infinitely many args
 
 # Bugs
 
