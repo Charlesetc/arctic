@@ -139,7 +139,7 @@ class Grammar
     # some newlines
     # into root
     # of parens
-    # fix_toplevel(@ast)
+    level_toplevel(@ast)
 
     collect do |x|
       object_literals x
@@ -238,13 +238,15 @@ class Grammar
     raise 'Got unexpected open square bracket' if count != 0
   end
 
-  def fix_toplevel(ast)
+  def level_toplevel(ast)
     lines = []
     line = []
     ast.children.each do |child|
-      if child.token == :newline and not line.empty?
-        lines << Parens.new(line, child)
-        line = []
+      if child.token == :newline
+        unless line.empty?
+          lines << Parens.new(line, line[0])
+          line = []
+        end
       else
         line << child
       end
