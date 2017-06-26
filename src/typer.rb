@@ -50,16 +50,59 @@ end
 # Logic for adding types
 #
 
+class Phonebook
+  # Something that keeps track of names
+
+  def initialize
+    @names = [{}]
+  end
+
+  def enter  #scope
+    @names << []
+  end
+
+  def exit
+    @names.pop
+  end
+
+  def lookup(name)
+    @names.each do |chapter|
+      if chapter.include?(name)
+        return chapter[name]
+      end
+    end
+    nil
+  end
+
+  def insert(name, ast)
+    @names.last[name] = ast
+  end
+end
+
 class Typer
 
   def initialize(root)
     @root = root
+    @phonebook = Phonebook.new
   end
 
   def run
 
-    p @root
+    # get initial definitions
+    @root.children.each do |item|
+      raise "this shouldn't happen" unless item.class == Parens
+      keyword = item.children[0]
 
+      if keyword.token == :ident and keyword.data == "define"
+        # ASSERT item.children[1] exists and is ident
+        # ASSERT item.children[2] exists
+        @phonebook.insert(item.children[1].data, item.children[2])
+      end
+    end
+
+    main_function = @phonebook.lookup('main')
+
+    p main_function
 
   end
 

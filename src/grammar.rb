@@ -251,6 +251,8 @@ class Grammar
         line << child
       end
     end
+    lines << Parens.new(line, line[0]) unless line.empty?
+
     ast.children = lines
   end
 
