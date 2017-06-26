@@ -1,0 +1,40 @@
+
+-- There's a cool idea
+-- instead o defining top-level functions like
+
+define square : x [ x * x ]
+
+-- You could just make it
+
+square : x [ x * x ]
+
+main [
+  -- etc
+]
+
+-- This seems a little more minimal.
+
+-- Similarly, within classes:
+
+class animal [
+
+  -- fields without 'field'
+  name
+  place = 0
+
+  -- functions without 'method'
+  walk : steps [ place += 1 ]
+
+  -- class functions without 'define'
+  .new : name [
+    animal <name = name>
+  ]
+]
+
+main [
+  cat = animal.new "cat"
+]
+
+
+-- All this requires is a top-level transformation
+-- it's not even recursive.

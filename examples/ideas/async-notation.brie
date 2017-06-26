@@ -44,3 +44,8 @@ Lastly,
 -- and it can be shortened to
 -- -> line ; line ; line
 -- if there are no arguments
+
+I also think that `: x -> 2` on the same line should only read one
+line for that block (the rest being part of the previous block)
+and only continues to read many lines if there's nothing after the ->
+on that line.

@@ -1,0 +1,98 @@
+
+-- stdlib.brie
+
+unwrap x [
+  case x [
+    Some x -> x
+    None -> raise Unwrap_none
+  ]
+]
+
+-- a `list` is a doubly-linked list
+--
+-- it has a pointer to the first and
+-- last elements, as well as the
+-- length of the list as a whole.
+
+class list [
+  -- type None | Some list_element
+  first = None
+  last = None
+  length = 0
+
+  push : newitem [
+    length += 1
+    item = list_element.new newitem
+
+    if length is 0 [
+      first = item
+      last = item
+    ] else [
+      (unwrap last).next = item
+      item.previous = unwrap last
+      last = item
+    ]
+
+    -- return the list itself
+    self
+  ]
+
+  unshift : newitem [
+    length += 1
+    item = list_element.new newitem
+    if length is 0 [
+      first = item
+      last = item
+    ] else [
+      (unwrap first).previous = item
+      item.next = unwrap first
+      first = item
+    ]
+
+    -- return the list
+    self
+  ]
+
+  pop [
+    length -= 1
+    case last [
+      Some x [
+        last = x.previous
+        x.value
+      ]
+      None [
+        raise List_pop_empty
+      ]
+    ]
+  ]
+
+  shift [
+    length -= 1
+    case first [
+      Some x [
+        first = x.previous
+        x.value
+      ]
+      None [
+        raise List_shift_empty
+      ]
+    ]
+  ]
+]
+
+class list_element [
+  previous
+  next
+  value
+
+  .new : value [
+    list_element <previous = None, next = None, value = value>
+  ]
+]
+
+
+-- Example usage
+
+main [
+
+]

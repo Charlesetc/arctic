@@ -10,7 +10,9 @@
 * while statements
 * support semicolons in blocks.
 * parse floats correctly
-* 'define' can take infinitely many args
+* 'define' can take infinitely many args -- problem
+* make a distinction in the tokenizer between operators and
+  functions -- still just keep them as idents.
 
 # Bugs
 
