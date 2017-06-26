@@ -10,7 +10,7 @@ Separator = Struct.new(:ast, :post)
 
 class Token
 
-  attr_accessor :data, :token, :start, :finish
+  attr_accessor :type, :data, :token, :start, :finish
 
   def initialize(token, data, start, finish)
     @token = token
@@ -27,15 +27,13 @@ class Token
     end
   end
 
-  def inspect_generics
+  def inspect_types
     if data
-      "#{token}(#{data})" + "_#{generic}"
+      "#{token}(#{data})" + "::#{type}"
     else
-      token.inspect + "_#{generic}" # do you need this?
+      token.inspect + "::#{type}" # do you need this?
     end
   end
-
-  # def type <-- defined in typer.rb!
 
 end
 
@@ -55,8 +53,8 @@ class Ast < Token
     "#{kind}#{children}"
   end
 
-  def inspect_generics
-    "#{kind}[#{children.map{|x| x.inspect_generics}.join(", ")}]" + "_#{generic}"
+  def inspect_types
+    "#{kind}[#{children.map{|x| x.inspect_types}.join(", ")}]" + "::#{type}"
   end
 
   def iterate
@@ -152,8 +150,8 @@ class Dot_access < Root
     "#{child.inspect}.#{name}"
   end
 
-  def inspect_generics
-    "#{child.inspect_generics}.#{name}_#{generic}"
+  def inspect_types
+    "#{child.inspect_types}.#{name}::#{type}"
   end
 end
 
@@ -171,9 +169,9 @@ class Parens < Root
     "(#{inner})"
   end
 
-  def inspect_generics
-    inner = @children.map {|x| x.inspect_generics}.join(" ")
-    "(#{inner})_#{generic}"
+  def inspect_types
+    inner = @children.map {|x| x.inspect_types}.join(" ")
+    "(#{inner})::#{type}"
   end
 end
 
@@ -193,10 +191,10 @@ class Block < Ast
     "#{kind}#{arguments}#{children}"
   end
 
-  def inspect_generics
-    args = arguments.map{|x| x.inspect_generics}.join(", ")
-    chlds = children.map{|x| x.inspect_generics}.join(", ")
-    "#{kind}[#{args}][#{chlds}]_#{generic}"
+  def inspect_types
+    args = arguments.map{|x| x.inspect_types}.join(", ")
+    chlds = children.map{|x| x.inspect_types}.join(", ")
+    "#{kind}[#{args}][#{chlds}]::#{type}"
   end
 end
 
@@ -217,10 +215,10 @@ class Let_in < Block
     "let_in #{name} #{value.inspect} #{children}"
   end
 
-  def inspect_generics
-    chlds = children.map{|x| x.inspect_generics}.join(", ")
+  def inspect_types
+    chlds = children.map{|x| x.inspect_types}.join(", ")
 
-    "let_in(#{name} #{value.inspect_generics} #{chlds})_#{generic}"
+    "let_in(#{name} #{value.inspect_types} #{chlds})::#{type}"
   end
 end
 
@@ -246,9 +244,9 @@ class Object_literal < Ast
     "<#{inner.join(" , ")}>"
   end
 
-  def inspect_generics
-    inner = @fields.map {|name, ast| "#{name} = #{ast.inspect_generics}" }
-    "<#{inner.join(" , ")}>_#{generic}"
+  def inspect_types
+    inner = @fields.map {|name, ast| "#{name} = #{ast.inspect_types}" }
+    "<#{inner.join(" , ")}>::#{type}"
   end
 end
 
