@@ -1,7 +1,7 @@
 
 -- stdlib.brie
 
-unwrap x [
+define unwrap : x [
   case x [
     Some x -> x
     None -> raise Unwrap_none
@@ -16,11 +16,11 @@ unwrap x [
 
 class list [
   -- type None | Some list_element
-  first = None
-  last = None
-  length = 0
+  field first = None
+  field last = None
+  field length = 0
 
-  push : newitem [
+  method push : newitem [
     length += 1
     item = list_element.new newitem
 
@@ -37,7 +37,7 @@ class list [
     self
   ]
 
-  unshift : newitem [
+  method unshift : newitem [
     length += 1
     item = list_element.new newitem
     if length is 0 [
@@ -53,7 +53,7 @@ class list [
     self
   ]
 
-  pop [
+  method pop [
     length -= 1
     case last [
       Some x [
@@ -66,7 +66,7 @@ class list [
     ]
   ]
 
-  shift [
+  method shift [
     length -= 1
     case first [
       Some x [
@@ -81,18 +81,17 @@ class list [
 ]
 
 class list_element [
-  previous
-  next
-  value
+  field previous
+  field next
+  field value
 
-  .new : value [
+  define new : value [
     list_element <previous = None, next = None, value = value>
   ]
 ]
 
-
 -- Example usage
 
-main [
+define main [
 
 ]
