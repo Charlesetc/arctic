@@ -38,3 +38,9 @@ main [
 
 -- All this requires is a top-level transformation
 -- it's not even recursive.
+er 
+Actually, I don't think I like this... 
+
+it makes the syntax less uniform and a bit more complicated.
+
+I'd opt for uniformity over conciseness.
