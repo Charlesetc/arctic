@@ -1,5 +1,6 @@
 
 require_relative './ast'
+require_relative './utils'
 
 BREAK = ".{}(,)[]<=> \t\n:;".chars
 
@@ -223,6 +224,7 @@ class Grammar
           block = Block.new(lines, arguments, child)
           line = []             # just added these: -- check in the future
           lines = []
+          arguments = []
           state = Searching
           block
         elsif child.token == :newline and count == 1
@@ -421,8 +423,3 @@ class Grammar
     end
   end
 end
-
-def error_ast(ast, reason)
-  STDERR.puts "Error: #{reason}", ast
-  exit(0)
- end

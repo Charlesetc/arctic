@@ -13,7 +13,7 @@ $i = 0
 def compare(input, *expected)
   begin
     $i += 1
-    expected = "root[#{expected.join(", ")}]"
+    expected = "root[(#{expected.join(" ")})]"
     found = ast(input).inspect
     passed = found == expected
   rescue
