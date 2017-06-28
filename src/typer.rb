@@ -168,6 +168,12 @@ class Phonebook
     if ast
       yield(ast, arguments)
     end # else we've already typed it with these types
+
+    if ast.children.last
+      ast.children.last.type
+    else
+      UnitType.new
+    end
   end
 end
 
@@ -211,29 +217,41 @@ class Typer
     when 1
       parens.type = first.type
     else
-      unless first.type.class == FunctionType
-        error_ast_type(first, expected: "a function")
-      end
+      error_ast_type(first, expected: "a Function") unless first.type.class == FunctionType
       arguments = parens.children[1...parens.children.length]
-      if first.type.arity < arguments.length
-        error_ast(first, "Takes #{first.type.arity} arguments but got #{arguments.length}")
-      elsif first.type.arity > arguments.length
+
+      # If greater
+      if first.type.arity > arguments.length
         parens.type = first.type.add_arguments(arguments)
       else
-        execute_function(first.type.add_arguments(arguments))
+        # If less than
+        if first.type.arity < arguments.length
+          if arguments.length == 1 and
+             first.type.arity == 0 and
+             arguments[0].type.class == UnitType
+            arguments = [] # and continue on to the execute function
+          else
+            error_ast(first, "Takes #{first.type.arity} arguments but got #{arguments.length}")
+          end
+        end
+
+        # if equal:
+        return_type = execute_function(first.type.add_arguments(arguments))
+        parens.type = return_type
       end
     end
   end
 
   def execute_function(function_type)
     @phonebook.enter
-    @phonebook.lookup_function(function_type) do |ast, arguments|
+    return_type = @phonebook.lookup_function(function_type) do |ast, arguments|
       ast.arguments.each_with_index do |name, i|
         @phonebook.insert(name.data, arguments[i])
       end
       ast.children.each { |x| handle_function_call(x) }
     end
     @phonebook.exit
+    return_type
   end
 
   def triage(ast)
