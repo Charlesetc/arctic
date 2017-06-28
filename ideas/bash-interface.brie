@@ -1,0 +1,25 @@
+
+-- If you could pipe to a bash function
+-- in brie transparently that would be
+-- very cool.
+
+require shell.sh
+
+define uppercase : string [
+  string.edit 0 : c [
+    c.uppercase
+  ]
+]
+
+define main : file [
+  sh $ `cat file | lines uppercase | `jq '.this'
+]
+
+-- Okay so I really like this idea.
+-- basically: ` is a prefix that
+-- makes a "command" object.
+-- then the `|` operator
+-- makes a new command object
+-- with the stdout being linked up, etc.
+-- sh then just calls .run or something.
+

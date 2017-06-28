@@ -1,0 +1,27 @@
+
+-- Since the arguments to `main` aren't really
+-- used yet...
+-- why don't you look at the main function
+-- and interpret it as an ARGV parser.
+-- so:
+
+-- readfile.brie
+define main : file [
+  let text = File.read file
+  puts text
+]
+
+-- translates to
+
+-- brie readfile.brie -o readfile
+-- ./readfile -file text.txt
+-- AND
+-- ./readfile -f text.txt
+
+-- Automatically!!
+
+-- imagine how easy it would be to write command line tools!
+-- note: each argument would have to be a string.
+
+
+

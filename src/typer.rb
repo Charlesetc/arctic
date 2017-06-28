@@ -41,23 +41,23 @@ class StringType < Type ; end
 class UnitType < Type ; end
 
 class FunctionType < Type
-  attr_reader :arity, :ast, :arguments
-  def initialize(ast, arity, arguments: [])
+  attr_reader :name, :arity, :arguments
+  def initialize(name, arity, arguments: [])
     # keep a reference to the
     # initial function definition
     # just because functions
     # can be passed around and
     # added arguments to.
-    @ast = ast
+    @name = name
     @arity = arity
     @arguments = arguments
   end
 
   def add_arguments(arguments)
     FunctionType.new(
-      @ast,
+      @name,
       @arity - arguments.length,
-      @arguments + arguments
+      arguments: @arguments + arguments
     )
   end
 end
@@ -73,8 +73,46 @@ end
 # Logic for adding types
 #
 
+def deepcopy(ast)
+  if ast.is_a? Array
+    return ast.map { |x| deepcopy(x) }
+  elsif ast.is_a? Hash
+    return ast.map { |k, x| [k, deepcopy(x)] }.to_h
+  elsif ast.is_a? Symbol or ast.is_a? Fixnum
+    return ast
+  end
+  ast = ast.clone
+  ast.instance_variables.each do |var|
+    ast.instance_variable_set(
+      var,
+      deepcopy(ast.instance_variable_get(var))
+    )
+  end
+  ast
+end
+
 class Phonebook
   # Something that keeps track of names
+
+  class PhoneFunction
+
+    attr_reader :ast, :name
+
+    def initialize(ast, name)
+      @name = name
+      @ast = ast
+      @expanded = {}
+    end
+
+    def expand(argument_types)
+      unless @expanded[argument_types]
+        deepcopy(@ast)
+      end
+    end
+
+  end
+
+  PhoneEntry = Struct.new(:ast)
 
   def initialize
     @names = [{}]
@@ -88,8 +126,8 @@ class Phonebook
     @names.pop
   end
 
-  def lookup(name)
-    @names.each do |chapter|
+  def lookup_internal(name)
+    @names.reverse.each do |chapter|
       if chapter.include?(name)
         return chapter[name]
       end
@@ -97,8 +135,33 @@ class Phonebook
     nil
   end
 
+  def lookup(name)
+    if (res = lookup_internal(name))
+      res.ast
+    else
+      nil
+    end
+  end
+
   def insert(name, ast)
-    @names.last[name] = ast
+    raise "don't insert untyped asts." if ast.type.nil?
+    if ast.type.class == FunctionType
+      @names.last[name] = PhoneFunction.new(ast, name)
+    else
+      @names.last[name] = PhoneEntry.new(ast)
+    end
+  end
+
+  def lookup_function(function_type)
+    phone_function = lookup_internal(function_type.name)
+    raise "every function should have been defined." if phone_function.nil?
+    arguments = function_type.arguments
+    argument_types = arguments.map { |a| a.type }
+    ast = phone_function.expand(argument_types)
+
+    if ast
+      yield(ast, arguments)
+    end # else we've already typed it with these types
   end
 end
 
@@ -129,6 +192,7 @@ class Typer
   end
 
   def handle_function_call(parens)
+    raise "already called" if parens.type
     raise "handle_function_call called on not-parens" unless parens.class == Parens
     parens.children.reverse.each { |c| triage(c) }
     first = parens.children[0]
@@ -147,21 +211,24 @@ class Typer
       elsif first.type.arity > arguments.length
         parens.type = first.type.add_arguments(arguments)
       else
-        execute_function(first.type.ast, first.type.arguments + arguments)
+        execute_function(first.type.add_arguments(arguments))
       end
     end
   end
 
-  def execute_function(ast, arguments)
+  def execute_function(function_type)
     @phonebook.enter
-    ast.arguments.each_with_index do |name, i|
-      @phonebook.insert(name.data, arguments[i])
+    @phonebook.lookup_function(function_type) do |ast, arguments|
+      ast.arguments.each_with_index do |name, i|
+        @phonebook.insert(name.data, arguments[i])
+      end
+      ast.children.each { |x| handle_function_call(x) }
     end
-    ast.children.each { |x| handle_function_call(x) }
     @phonebook.exit
   end
 
   def triage(ast)
+    raise "already triaged" if ast.type
     case
     when ast.class == Token
       handle_token(ast)
@@ -199,8 +266,6 @@ class Typer
         number = @phonebook.lookup(token.data)
         if number.nil?
           error_ast(token, "Undefined reference: #{token.data}")
-        elsif number.type.nil?
-          triage(number)
         end
         token.type = number.type
       end
@@ -212,6 +277,7 @@ class Typer
   def handle_define(item)
     # ASSERT item.children[1] exists and is ident
     # ASSERT item.children[2] exists
+    triage(item.children[2])
     @phonebook.insert(item.children[1].data, item.children[2])
   end
 
@@ -237,8 +303,12 @@ class Typer
   end
 
   def handle_block(block)
-    block.type = FunctionType.new(block, block.arguments.length)
-
+    name = block.hash.to_s
+    block.type = FunctionType.new(
+      name,
+      block.arguments.length
+    )
+    @phonebook.insert(name, block)
   end
 end
 
