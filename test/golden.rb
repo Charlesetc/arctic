@@ -36,10 +36,9 @@ end
 def typer(input)
   t = Tokenizer.new(input)
   ast = Grammar.new(t.tokens).produce_ast
-  typer = Typer.new(ast)
-  typer.unification
+  typer = Typer.new(ast).run
 
-  typer.stringify_types
+  ast.inspect_types
 end
 
 

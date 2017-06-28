@@ -1,1 +1,1 @@
-{[3]=>Open_function(takes=4, returns=5), [0, 1, 2, 6]=>Open_object(fields={"this"=>3})}
+root[(ident(define):: ident(main):: block[][(block[][(ident(define):: ident(x):: ident(x)::)::, (ident(x)::.this:: ident(a)::)::]::Function)::Function]::Function)::]::

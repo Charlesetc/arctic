@@ -1,4 +1,4 @@
-: x [
+define main [ : x [
   define x 2
   x
-]
+] ]

@@ -1,1 +1,1 @@
-{[4, 3]=>Open_function(takes=8, returns=9), [0, 1, 2, 5, 10]=>Literal(subtype=integer), [6, 7, 11]=>Function_literal(takes=3, returns=9)}
+root[(ident(define):: ident(main):: block[][(ident(define):: ident(x):: ident(3)::Integer)::, (block[ident(x)::][(ident(x):: ident(a)::)::]::Function)::Function, (ident(x)::Integer)::Integer]::Function)::]::

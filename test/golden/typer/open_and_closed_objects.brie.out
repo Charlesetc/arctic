@@ -1,1 +1,1 @@
-{[2, 3]=>Closed_object(fields={"name"=>11}), [8, 11]=>Literal(subtype=string), [0, 1, 4, 5, 16]=>Closed_object(fields={"name"=>10, "style"=>9}), [6, 9, 12, 13]=>Literal(subtype=integer), [7, 10, 14, 15]=>Literal(subtype=integer)}
+root[(ident(define):: ident(main):: block[][(block[][(ident(define):: ident(bob):: <name = (ident(2)::):: , style = (ident(3)::)::>::)::, (ident(bob)::.name::)::, (ident(bob)::.style::)::, (ident(define):: ident(bob):: <name = (string(Hi)::)::>::)::]::Function)::Function]::Function)::]::

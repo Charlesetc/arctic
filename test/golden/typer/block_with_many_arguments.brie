@@ -1,1 +1,2 @@
-: a b c d [ a ]
+define main [ : a b c d [ a ]
+]

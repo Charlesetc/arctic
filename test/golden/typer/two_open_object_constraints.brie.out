@@ -1,1 +1,1 @@
-{[4, 5]=>Unknown(), [6, 7]=>Unknown(), [0, 1, 2, 3, 8]=>Open_object(fields={"that"=>4, "this"=>6})}
+root[(ident(define):: ident(main):: block[][(block[][(ident(define):: ident(x):: ident(x)::)::, (ident(x)::.this::)::, (ident(x)::.that::)::]::Function)::Function]::Function)::]::
