@@ -16,7 +16,7 @@ def error_ast(ast, reason)
   exit(0)
 end
 
-def error_ast_type(ast, type)
-  STDERR.puts "Error: Expected #{type}, but got #{ast.type.inspect}", ast
+def error_ast_type(ast, expected:)
+  STDERR.puts "Error: Expected #{expected}, but got #{ast.type.inspect}", ast
   exit(0)
 end

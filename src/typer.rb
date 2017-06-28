@@ -67,6 +67,12 @@ class ObjectType < Type
   def initialize(fields)
     @fields = fields
   end
+  def inspect
+    inner = @fields.map do |name, type|
+      "#{name} = #{type.inspect}"
+    end.join(", ")
+    "<#{inner}>"
+  end
 end
 
 #
@@ -188,7 +194,10 @@ class Typer
 
     error_ast(@root, "no main function") unless main_function
 
-    main_function.children.each { |c| handle_function_call(c) }
+
+    # execute_function(main_function.type)
+    # main_function.children.each { |c| handle_function_call(c) }
+    main_function.children.each { |c| triage(c) }
   end
 
   def handle_function_call(parens)
@@ -203,7 +212,7 @@ class Typer
       parens.type = first.type
     else
       unless first.type.class == FunctionType
-        error_ast_type(first, "a function")
+        error_ast_type(first, expected: "a function")
       end
       arguments = parens.children[1...parens.children.length]
       if first.type.arity < arguments.length
@@ -233,19 +242,18 @@ class Typer
     when ast.class == Token
       handle_token(ast)
     when ast.class == Parens
-      keyword = item.children[0]
+      keyword = ast.children[0]
       # assuming nonempty parens at the moment
       if keyword and keyword.token == :ident
         case keyword.data
         when "define"
-          handle_define(ast)
+          return handle_define(ast)
         when "if"
           raise "unimplemented"
-          handle_if()
+          return handle_if()
         end
-      else
-        handle_function_call(ast)
       end
+      handle_function_call(ast)
     when ast.class == Object_literal
       handle_object_literal(ast)
     when ast.class == Block
@@ -294,7 +302,7 @@ class Typer
       error_ast_type(dot.child, expected: "object")
     end
 
-    type = dot.child.fields[dot.name]
+    type = dot.child.type.fields[dot.name]
     if type
       dot.type = type
     else
