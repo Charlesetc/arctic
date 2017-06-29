@@ -119,10 +119,9 @@ class Phonebook
 
   end
 
-  PhoneEntry = Struct.new(:ast)
-
   def initialize
     @names = [{}]
+    @function_literals = {}
   end
 
   def enter  #scope
@@ -133,7 +132,7 @@ class Phonebook
     @names.pop
   end
 
-  def lookup_internal(name)
+  def lookup(name)
     @names.reverse.each do |chapter|
       if chapter.include?(name)
         return chapter[name]
@@ -142,26 +141,14 @@ class Phonebook
     nil
   end
 
-  def lookup(name)
-    if (res = lookup_internal(name))
-      res.ast
-    else
-      nil
-    end
-  end
-
   def insert(name, ast)
     raise "don't insert untyped asts." if ast.type.nil?
-    if ast.type.class == FunctionType
-      @names.last[name] = PhoneFunction.new(ast, name, stack: @names)
-    else
-      @names.last[name] = PhoneEntry.new(ast)
-    end
+    @names.last[name] = ast
   end
 
   def lookup_function(function_type)
-    phone_function = lookup_internal(function_type.name)
-    raise "every function should have been defined." if phone_function.nil?
+    phone_function = @function_literals[function_type.name]
+    raise "every block should have been defined." if phone_function.nil?
     arguments = function_type.arguments
     argument_types = arguments.map { |a| a.type }
     ast = phone_function.expand(argument_types)
@@ -179,6 +166,11 @@ class Phonebook
       UnitType.new
     end
   end
+
+  def insert_block(name, ast)
+      @function_literals[name] = PhoneFunction.new(ast, name, stack: @names)
+  end
+
 end
 
 class Typer
@@ -338,7 +330,7 @@ class Typer
       name,
       block.arguments.length
     )
-    @phonebook.insert(name, block)
+    @phonebook.insert_block(name, block)
   end
 end
 
