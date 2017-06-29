@@ -1,6 +1,6 @@
 
-require '../src/typer'
-require '../src/grammar'
+require './src/typer'
+require './src/grammar'
 require 'testrocket'
 
 
@@ -9,14 +9,14 @@ suites = [
 ]
 
 def record(suite)
-  Dir.glob("golden/#{suite}/*.brie") do |filename|
+  Dir.glob("test/golden/#{suite}/*.brie") do |filename|
     out = self.send(suite, File.read(filename))
     File.write(filename + ".out", out)
   end
 end
 
 def check(suite)
-  Dir.glob("golden/#{suite}/*.brie") do |filename|
+  Dir.glob("test/golden/#{suite}/*.brie") do |filename|
     print "  #{File.basename(filename, ".brie")} -- "
     out = self.send(suite, File.read(filename))
     begin

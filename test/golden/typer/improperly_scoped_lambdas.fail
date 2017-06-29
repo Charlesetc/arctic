@@ -1,0 +1,9 @@
+define main [
+        define x < y = 3 >
+        define x 2
+        define l [
+                x 
+        ]
+        define x < y = 3 >
+        (l ()).y
+]

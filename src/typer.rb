@@ -102,10 +102,11 @@ class Phonebook
 
   class PhoneFunction
 
-    attr_reader :ast, :name
+    attr_reader :ast, :name, :stack
 
-    def initialize(ast, name)
+    def initialize(ast, name, stack:)
       @name = name
+      @stack = stack.map { |h| h.clone }
       @ast = ast
       @expanded = {}
     end
@@ -152,7 +153,7 @@ class Phonebook
   def insert(name, ast)
     raise "don't insert untyped asts." if ast.type.nil?
     if ast.type.class == FunctionType
-      @names.last[name] = PhoneFunction.new(ast, name)
+      @names.last[name] = PhoneFunction.new(ast, name, stack: @names)
     else
       @names.last[name] = PhoneEntry.new(ast)
     end
@@ -166,7 +167,10 @@ class Phonebook
     ast = phone_function.expand(argument_types)
 
     if ast
+      names = @names
+      @names = phone_function.stack
       yield(ast, arguments)
+      @names = names
     end # else we've already typed it with these types
 
     if ast.children.last
