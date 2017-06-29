@@ -26,7 +26,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 26px;
   font-weight: normal;
   font-family: 'Lora', Times, serif;
-  padding-top:20px;
+  padding-top:30px;
 }
 
 img#fox {
@@ -48,6 +48,7 @@ a:hover {
 
 h1 {
   font-size: 64px;
+  margin-bottom:40px;
 }
 
 h1 em {
@@ -61,7 +62,7 @@ h2 {
 }
 
 p {
-  margin-top:30px;
+  margin-top:20px;
   text-align: justify;
 }
 
@@ -95,17 +96,20 @@ em {
 }
 
 code {
-  background-color: #eee;
+  background-color: white;
+  border: 1px solid #333;
   border-radius: 2px;
-  padding: 4px 10px;
+  padding: 2px 6px;
   color: #e8e;
   font-size: 16px;
+  margin-right:3px;
 }
 
 blockquote {
   border-left: 3px solid #333;
   padding-left: 20px;
   margin-left:10px;
+  padding-bottom:3px;
   /* specifically for the front page... */
 }
 
@@ -116,9 +120,10 @@ pre code {
   /* background: none; */
   /* border-radius: none; */
   /* padding: none none; */
-  background-color: #eee;
+  border: 1px solid #333;
+  background-color: white;
   border-radius: 4px;
-  padding-top:   6px;
-  padding-bottom:6px;
+  padding:14px;
   margin-top:30px;
+  margin-bottom:30px;
 }

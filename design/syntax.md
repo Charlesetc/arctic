@@ -11,7 +11,8 @@ let x = 2   -- Bindings
 ```
 
 Then we add the lambda syntax `: [ ]`, which is used for
-blocks, functions, classes, etc.
+blocks, functions, classes, etc. (The arguments come after
+the `:`, which can be dropped if there are none)
 
 
 ```

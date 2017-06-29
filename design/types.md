@@ -20,7 +20,7 @@ square 5.0
 ```
 
 This works! Even though `3` is an integer and `5.0` is a float, they
-both have a `.times` method. Similarly,
+both have a `.*` method. Similarly,
 
 ```
 let square = <sides = 4, color = "blue">
@@ -57,7 +57,8 @@ let a = [
 ```
 
 Note that `Point`, `Person`, and `Number` are not defined anywhere.
-They are polymorphic variants that tell the compiler it's dealing with a specific type.
+They are polymorphic variants that tell the compiler everything in
+a given expression with a given tag has the same type.
 
 ## Other languages
 
@@ -69,5 +70,5 @@ Brie is the only one, however, with type inference and a standard library that t
 its structural typing.
 
 OCaml comes the closest, as it's also type-inferred and has structural
-types. However, OCaml very rarely uses its structural types and OCaml
+types in objects. However, OCaml very rarely uses its object system and OCaml
 uses dynamic dispatch for method calls.

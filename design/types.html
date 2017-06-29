@@ -29,7 +29,7 @@
 ]
 square 3
 square 5.0</code></pre>
-<p>This works! Even though <code>3</code> is an integer and <code>5.0</code> is a float, they both have a <code>.times</code> method. Similarly,</p>
+<p>This works! Even though <code>3</code> is an integer and <code>5.0</code> is a float, they both have a <code>.*</code> method. Similarly,</p>
 <pre><code>let square = &lt;sides = 4, color = &quot;blue&quot;&gt;
 let triangle = &lt;sides = 3, color = &quot;red&quot;&gt;
 
@@ -50,11 +50,11 @@ print_sides lobster</code></pre>
   Person &lt;name = &quot;bob&quot;&gt;,
   Number 3
 ]</code></pre>
-<p>Note that <code>Point</code>, <code>Person</code>, and <code>Number</code> are not defined anywhere. They are polymorphic variants that tell the compiler it's dealing with a specific type.</p>
+<p>Note that <code>Point</code>, <code>Person</code>, and <code>Number</code> are not defined anywhere. They are polymorphic variants that tell the compiler everything in a given expression with a given tag has the same type.</p>
 <h2 id="other-languages">Other languages</h2>
 <p>Is Brie's system replicated in any other languages?</p>
 <p>Yes, several have structural typing, including OCaml, Go, and Scala.</p>
 <p>Brie is the only one, however, with type inference and a standard library that takes advantage of its structural typing.</p>
-<p>OCaml comes the closest, as it's also type-inferred and has structural types. However, OCaml very rarely uses its structural types and OCaml uses dynamic dispatch for method calls.</p>
+<p>OCaml comes the closest, as it's also type-inferred and has structural types in objects. However, OCaml very rarely uses its object system and OCaml uses dynamic dispatch for method calls.</p>
 </body>
 </html>
