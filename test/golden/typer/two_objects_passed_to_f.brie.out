@@ -1,1 +1,0 @@
-root[(ident(define):: ident(main):: block[][(block[][(ident(define):: ident(f):: block[ident(x)::][(ident(x)::.this::)::, (ident(x)::)::]::)::, (ident(f):: <this = (ident(2)::):: , that = (ident(3)::)::>::)::, (ident(f):: <wow = (ident(3)::):: , this = (ident(9)::)::>::)::]::Function)::Function]::Function)::]::

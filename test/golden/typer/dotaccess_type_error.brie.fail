@@ -1,2 +1,4 @@
-[ define f 2
-  (f a).that ]
+define main [
+  define f : x [ x ]
+  (f 2).that
+]

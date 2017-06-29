@@ -1,1 +1,0 @@
-root[(ident(define):: ident(main):: block[][(block[][(ident(define):: ident(bob):: <name = (ident(2)::):: , style = (ident(3)::)::>::)::, (ident(bob)::.name::)::, (ident(bob)::.style::)::, (ident(define):: ident(bob):: <name = (string(Hi)::)::>::)::]::Function)::Function]::Function)::]::

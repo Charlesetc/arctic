@@ -1,5 +1,0 @@
-define main [
-  define x 3
-  : x [ x a ]
-  x
-]

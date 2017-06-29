@@ -1,6 +1,0 @@
-define main [ : x [
-  x a
-  define x 3
-  define y "hi"
-  x
-] ]

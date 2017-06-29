@@ -1,4 +1,0 @@
-define main [ [
-          define add : a b [ 2 ]
-                  add 2
-] ]

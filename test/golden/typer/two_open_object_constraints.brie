@@ -1,5 +1,0 @@
-define main [ [
-  define x x
-  x.this
-  x.that
-] ]

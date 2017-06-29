@@ -1,4 +1,0 @@
-define main [ [
-  define f f
-  f a
-] ]

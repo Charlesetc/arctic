@@ -1,8 +1,0 @@
-define main [ [
-        define f : x [
-                x.this 
-                x
-        ]
-        f < this = 2 , that = 3>
-        f < wow = 3 , this = 9> 
-]            ]

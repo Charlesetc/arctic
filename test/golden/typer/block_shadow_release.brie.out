@@ -1,1 +1,0 @@
-root[(ident(define):: ident(main):: block[][(ident(define):: ident(x):: ident(3)::Integer)::, (block[ident(x)::][(ident(x):: ident(a)::)::]::Function)::Function, (ident(x)::Integer)::Integer]::Function)::]::

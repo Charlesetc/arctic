@@ -1,0 +1,11 @@
+define sleep : x [
+        x.sleep
+        x
+]
+define main [
+        define x < sleep = 2, hi = 3 > 
+        define y < sleep = "cool", there = 4 >
+        (sleep x).hi
+        (sleep y).there
+]
+

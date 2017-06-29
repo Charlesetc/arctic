@@ -1,1 +1,0 @@
-root[(ident(define):: ident(main):: block[][(<x = (ident(3)::Integer)::Integer , y = (ident(4)::Integer)::Integer>::<x = Integer, y = Integer>)::<x = Integer, y = Integer>]::Function)::]::
