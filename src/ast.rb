@@ -226,7 +226,7 @@ end
 class Object_literal < Ast
   attr_reader :fields
 
-  def initialize(field_map, backup_child)
+  def initialize(field_map)
     # we don't need a backup child because v has >0 elements.
     field_map.each { |k, v| field_map[k] = Parens.new(v, nil) }
     @fields = field_map

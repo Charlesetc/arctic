@@ -1,26 +1,30 @@
 
 require_relative './grammar'
+require_relative './typer'
 
 class SourceFile
+  attr_reader :ast, :name
 
-  def initialize(filename)
-    @filename = filename
+  def initialize(name)
+    @name = name
+    parse
   end
 
   def read
-    File.read(@filename)
+    File.read(@name)
   end
 
   def parse
-    tokens = Tokenizer.new(read, file: @filename).tokens
-    ast = Grammar.new(tokens).produce_ast
+    tokens = Tokenizer.new(read, file: @name).tokens
+    @ast = Grammar.new(tokens).produce_ast
   end
 
 end
 
 class StdinFile < SourceFile
   def initialize
-    @filename = "main"
+    @name = "main"
+    parse
   end
   def read
     ARGF.read

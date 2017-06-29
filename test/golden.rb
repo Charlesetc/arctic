@@ -11,7 +11,7 @@ suites = [
 
 def record(suite)
   Dir.glob("test/golden/#{suite}/*.brie") do |filename|
-    out = self.send(suite, File.read(filename))
+    out = self.send(suite, filename)
     File.write(filename + ".out", out)
   end
 end
@@ -35,9 +35,9 @@ end
 
 ## Suite runners
 def typer(filename)
-  ast = SourceFile.new(filename).parse
-  Typer.new(ast).run
-  ast.inspect_types
+  file = SourceFile.new(filename)
+  Typer.new(file).run
+  file.ast.inspect_types
 end
 
 

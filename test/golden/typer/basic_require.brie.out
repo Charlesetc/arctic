@@ -1,0 +1,1 @@
+root[(ident(require):: ident(required_file)::)::, (ident(define):: ident(main):: block[][((ident(required_file)::<example_function = Function, main = Function>.example_function::Function ()::Unit)::<x = Integer>.x::Integer)::Integer]::Function)::]::

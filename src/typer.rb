@@ -1,5 +1,7 @@
 
 require 'set'
+require_relative './phonebook'
+require_relative './files'
 require_relative './utils'
 require_relative './ast'
 
@@ -84,7 +86,7 @@ def deepcopy(ast)
     return ast.map { |x| deepcopy(x) }
   elsif ast.is_a? Hash
     return ast.map { |k, x| [k, deepcopy(x)] }.to_h
-  elsif ast.is_a? Symbol or ast.is_a? Fixnum
+  elsif ast.is_a?(Symbol) || ast.is_a?(Fixnum)
     return ast
   end
   ast = ast.clone
@@ -97,105 +99,40 @@ def deepcopy(ast)
   ast
 end
 
-class Phonebook
-  # Something that keeps track of names
-
-  class PhoneFunction
-
-    attr_reader :ast, :name, :stack
-
-    def initialize(ast, name, stack:)
-      @name = name
-      @stack = stack.map { |h| h.clone }
-      @ast = ast
-      @expanded = {}
-    end
-
-    def expand(argument_types)
-      unless @expanded[argument_types]
-        deepcopy(@ast)
-      end
-    end
-
-  end
-
-  def initialize
-    @names = [{}]
-    @function_literals = {}
-  end
-
-  def enter  #scope
-    @names << {}
-  end
-
-  def exit
-    @names.pop
-  end
-
-  def lookup(name)
-    @names.reverse.each do |chapter|
-      if chapter.include?(name)
-        return chapter[name]
-      end
-    end
-    nil
-  end
-
-  def insert(name, ast)
-    raise "don't insert untyped asts." if ast.type.nil?
-    @names.last[name] = ast
-  end
-
-  def lookup_function(function_type)
-    phone_function = @function_literals[function_type.name]
-    raise "every block should have been defined." if phone_function.nil?
-    arguments = function_type.arguments
-    argument_types = arguments.map { |a| a.type }
-    ast = phone_function.expand(argument_types)
-
-    if ast
-      names = @names
-      @names = phone_function.stack
-      yield(ast, arguments)
-      @names = names
-    end # else we've already typed it with these types
-
-    if ast.children.last
-      ast.children.last.type
-    else
-      UnitType.new
-    end
-  end
-
-  def insert_block(name, ast)
-      @function_literals[name] = PhoneFunction.new(ast, name, stack: @names)
-  end
-
-end
-
 class Typer
 
-  def initialize(root)
-    @root = root
-    @phonebook = Phonebook.new
+  def initialize(file, phonebook: nil)
+    @file = file
+    @phonebook = phonebook || Phonebook.new
   end
 
-  def run
-
+  def index_file
     # get initial definitions
-    @root.children.each do |item|
+    @file.ast.children.each do |item|
       raise "this shouldn't happen" unless item.class == Parens
       keyword = item.children[0]
 
-      if keyword.token == :ident and keyword.data == "define"
+      if keyword.token != :ident
+        error_ast(item, "expecting valid top-level identifier")
+      end
+
+      # top level items
+      case keyword.data
+      when "define"
         handle_define(item)
+      when "require"
+        handle_require(item)
+      else
+        error_ast(item, "expecting valid top-level identifier")
       end
     end
+  end
 
-    main_function = @phonebook.lookup('main')
+  def run
+    index_file
 
+    main_function = @phonebook.lookup(@file.name, "main")
     error_ast(@root, "no main function") unless main_function
-
 
     # execute_function(main_function.type)
     # main_function.children.each { |c| handle_function_call(c) }
@@ -242,7 +179,7 @@ class Typer
     @phonebook.enter
     return_type = @phonebook.lookup_function(function_type) do |ast, arguments|
       ast.arguments.each_with_index do |name, i|
-        @phonebook.insert(name.data, arguments[i])
+        @phonebook.insert(@file.name, name.data, arguments[i])
       end
       ast.children.each { |x| handle_function_call(x) }
     end
@@ -285,7 +222,7 @@ class Typer
       elsif token.data.valid_float?
         token.type = FloatType.new
       else
-        number = @phonebook.lookup(token.data)
+        number = @phonebook.lookup(@file.name, token.data)
         if number.nil?
           error_ast(token, "Undefined reference: #{token.data}")
         end
@@ -300,7 +237,7 @@ class Typer
     # ASSERT item.children[1] exists and is ident
     # ASSERT item.children[2] exists
     triage(item.children[2])
-    @phonebook.insert(item.children[1].data, item.children[2])
+    @phonebook.insert(@file.name, item.children[1].data, item.children[2])
   end
 
   def handle_object_literal(object)
@@ -331,6 +268,45 @@ class Typer
       block.arguments.length
     )
     @phonebook.insert_block(name, block)
+  end
+
+  def handle_require(item)
+    # this function parses a file,
+    # and then makes a new typer with the
+    # same phonebook that goes and fills in
+    # the initial top level definitions it
+    # encounters.
+    #
+    # Finally, we make a new object with
+    # the name required and define it
+    # for this module. This object
+    # has references to each of the
+    # definitions in the file we parsed.
+
+    # support directories in the future
+    filename = item.children[1].data + ".brie"
+    filename = same_dir_as(@file.name, filename)
+
+    filetyper = Typer.new(SourceFile.new(filename), phonebook: @phonebook)
+    filetyper.index_file
+
+    defs = @phonebook.dump_definitions_for_file(filename)
+    error_ast(item, "Can't require files with no definitions") if defs.empty?
+
+    defs = defs.map { |k, v| [k, [v]] }.to_h
+    object = Object_literal.new(defs)
+    object.type = ObjectType.new(
+      object.fields.map do |k,v|
+        # they are all parens
+        # with one value.
+        v.type = v.children[0].type
+        [k, v.type]
+      end.to_h
+    )
+
+    # define it locally
+    #
+    @phonebook.insert(@file.name, item.children[1].data, object)
   end
 end
 

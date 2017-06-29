@@ -20,3 +20,7 @@ def error_ast_type(ast, expected:)
   STDERR.puts "Error: Expected #{expected}, but got #{ast.type.inspect}", ast
   exit(0)
 end
+
+def same_dir_as(dirfile, newfile)
+  File.dirname(dirfile) + "/" + newfile
+end

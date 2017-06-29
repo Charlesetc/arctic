@@ -1,0 +1,10 @@
+
+define example_function [ < x = 2 > ]
+
+define main [
+  -- technically this will be parsed as a test
+  -- I guess that's good; it should be parseable.
+  -- nothing cool though
+  -- may as well call a function:
+  (example_function ()).x
+]

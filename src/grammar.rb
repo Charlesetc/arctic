@@ -344,7 +344,7 @@ class Grammar
         end
 
         if count.zero?
-          obj = Object_literal.new(fields, child)
+          obj = Object_literal.new(fields)
           fields = {}
           state = Searching
           obj

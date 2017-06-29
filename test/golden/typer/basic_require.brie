@@ -1,0 +1,5 @@
+require required_file
+
+define main [
+  (required_file.example_function ()).x
+]

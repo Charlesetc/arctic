@@ -7,6 +7,6 @@ require_relative './typer'
 # # ast gets mutated
 # Typer.new(ast).run
 
-ast = StdinFile.new.parse
-Typer.new(ast).run
-puts ast.inspect_types
+file = StdinFile.new
+Typer.new(file).run
+puts file.ast.inspect_types
