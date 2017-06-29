@@ -1,4 +1,5 @@
 
+require './src/files'
 require './src/typer'
 require './src/grammar'
 require 'testrocket'
@@ -18,7 +19,7 @@ end
 def check(suite)
   Dir.glob("test/golden/#{suite}/*.brie") do |filename|
     print "  #{File.basename(filename, ".brie")} -- "
-    out = self.send(suite, File.read(filename))
+    out = self.send(suite, filename)
     begin
       expected = File.read(filename + ".out").chomp
     rescue
@@ -33,14 +34,11 @@ def check(suite)
 end
 
 ## Suite runners
-def typer(input)
-  t = Tokenizer.new(input)
-  ast = Grammar.new(t.tokens).produce_ast
-  typer = Typer.new(ast).run
-
+def typer(filename)
+  ast = SourceFile.new(filename).parse
+  Typer.new(ast).run
   ast.inspect_types
 end
-
 
 
 ## Main

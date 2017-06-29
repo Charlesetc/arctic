@@ -1,12 +1,12 @@
 
-require_relative './grammar'
+require_relative './files'
 require_relative './typer'
 
-t = Tokenizer.new(ARGF.read.chomp)
+# tokens = Tokenizer.new(ARGF.read.chomp).tokens
+# ast = Grammar.new(tokens).produce_ast
+# # ast gets mutated
+# Typer.new(ast).run
 
-ast = Grammar.new(t.tokens).produce_ast
-
-# ast gets mutated
+ast = StdinFile.new.parse
 Typer.new(ast).run
-
 puts ast.inspect_types

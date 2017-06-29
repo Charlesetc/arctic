@@ -6,7 +6,8 @@ BREAK = ".{}(,)[]<=> \t\n:;".chars
 
 class Tokenizer
 
-  def initialize(text)
+  def initialize(text, file:)
+    @file = file
     @text = text
     @index = 0
     @tokens = []
