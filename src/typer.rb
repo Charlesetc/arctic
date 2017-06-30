@@ -208,7 +208,7 @@ class Typer
   end
 
   def handle_block(block)
-    name = block.hash.to_s
+    name = @phonebook.closure_number
     block.type = FunctionType.new(
       name,
       block.arguments.length

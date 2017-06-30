@@ -17,9 +17,12 @@ class JsCompiler
 
   def compile
     run_triage
-    @main_function.children.map do |child|
-      child.compiled
-    end
+
+    inner = @main_function.children.map do |child|
+      "\t" + child.compiled + "\n"
+    end.join
+
+    "function main() {\n#{inner}}"
   end
 
   def before_triage(ast)
@@ -31,16 +34,15 @@ class JsCompiler
     when :ident
       token.compiled = token.data
     when :string
-      token.compiled = token.inspect
+      token.compiled = token.data.inspect
     else
       error_ast(token, "do not know how to handle token #{token.token}")
     end
   end
 
   def handle_define(item)
-    item.compiled = "
-    var #{item.children[1].data} = #{item.children[2].compiled};
-    "
+    item.compiled =
+      "var #{item.children[1].data} = #{item.children[2].compiled};"
   end
 
   def handle_function_call(parens)
@@ -56,15 +58,9 @@ class JsCompiler
 
       # If greater
       if first.type.arity > arguments.length
-        # get the closure
-        if first.type.arguments.empty?
-          parens.compiled = "new_closure()" # also close over variables...
-        else
-          parens.compiled = first.compiled
-        end
         # fill in the arguments
         inner = arguments.map { |x| x.compiled }.join(",")
-        parens.compiled += ".fill_in_arguments([#{inner}])"
+        parens.compiled = first.compiled + ".fill_in_arguments(#{inner})"
       else
         # if equal:
         # now we have all the arguments,
@@ -75,25 +71,30 @@ class JsCompiler
 
         # need the arguments because it's based on their
         # types. Could be improved a bit.
-        parens.compiled = prepare_function_call(
+        args = arguments.map { |x| x.compiled }.join(",")
+        news = ".fill_in_arguments(#{args})"
+        news += prepare_function_call(
           first.type.add_arguments(arguments)
         )
+        parens.compiled = first.compiled + news
       end
     end
   end
 
-  def prepare_funciton_call(function_type)
+  def prepare_function_call(function_type)
     @phonebook.lookup_function(
       function_type,
       method: :fetch
     ) do |ast, arguments|
-      args = arguments.map { |x| x.compiled }.join(",")
       argtypes = arguments.map { |x| x.type }
+      triage(ast)
 
-      ast.compiled +
-      ".fill_in_arguments(#{args})" +
       ".call(#{specific_fp(function_type.name, argtypes)})"
     end
+  end
+
+  def handle_block(block)
+    block.compiled = 'new_closure()'
   end
 
 end

@@ -28,6 +28,7 @@ class Phonebook
   def initialize
     @names = [{}]
     @function_literals = {}
+    @closure_number = 0
   end
 
   def enter  #scope
@@ -86,4 +87,7 @@ class Phonebook
       @function_literals[name] = PhoneFunction.new(ast, name, stack: @names)
   end
 
+  def closure_number
+    @closure_number += 1
+  end
 end

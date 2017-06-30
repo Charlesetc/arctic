@@ -1,0 +1,5 @@
+define main [
+  define f : x y z [ x ]
+  define y [ 2 ]
+  f 2 "hi" y
+]
