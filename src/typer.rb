@@ -4,6 +4,7 @@ require_relative './phonebook'
 require_relative './files'
 require_relative './utils'
 require_relative './ast'
+require_relative './triage'
 
 #
 # Types
@@ -99,50 +100,33 @@ def deepcopy(ast)
   ast
 end
 
+
 class Typer
+  include Triage
+  alias_method :run, :run_triage
 
   def initialize(file, phonebook: nil)
     @file = file
     @phonebook = phonebook || Phonebook.new
   end
 
-  def index_file
-    # get initial definitions
-    @file.ast.children.each do |item|
-      raise "this shouldn't happen" unless item.class == Parens
-      keyword = item.children[0]
-
-      if keyword.token != :ident
-        error_ast(item, "expecting valid top-level identifier")
-      end
-
-      # top level items
-      case keyword.data
-      when "define"
-        handle_define(item)
-      when "require"
-        handle_require(item)
-      else
-        error_ast(item, "expecting valid top-level identifier")
-      end
-    end
+  def before_triage(ast)
+    raise "already triaged" if ast.type
   end
 
-  def run
-    index_file
-
-    main_function = @phonebook.lookup(@file.name, "main")
-    error_ast(@root, "no main function") unless main_function
-
-    # execute_function(main_function.type)
-    # main_function.children.each { |c| handle_function_call(c) }
-    main_function.children.each { |c| triage(c) }
+  def execute_function(function_type)
+    @phonebook.enter
+    return_type = @phonebook.lookup_function(function_type) do |ast, arguments|
+      ast.arguments.each_with_index do |name, i|
+        @phonebook.insert(@file.name, name.data, arguments[i])
+      end
+      ast.children.each { |x| triage_function_call(x) }
+    end
+    @phonebook.exit
+    return_type
   end
 
   def handle_function_call(parens)
-    raise "already called" if parens.type
-    raise "handle_function_call called on not-parens" unless parens.class == Parens
-    parens.children.reverse.each { |c| triage(c) }
     first = parens.children[0]
     case parens.children.length
     when 0
@@ -175,45 +159,6 @@ class Typer
     end
   end
 
-  def execute_function(function_type)
-    @phonebook.enter
-    return_type = @phonebook.lookup_function(function_type) do |ast, arguments|
-      ast.arguments.each_with_index do |name, i|
-        @phonebook.insert(@file.name, name.data, arguments[i])
-      end
-      ast.children.each { |x| handle_function_call(x) }
-    end
-    @phonebook.exit
-    return_type
-  end
-
-  def triage(ast)
-    raise "already triaged" if ast.type
-    case
-    when ast.class == Token
-      handle_token(ast)
-    when ast.class == Parens
-      keyword = ast.children[0]
-      # assuming nonempty parens at the moment
-      if keyword and keyword.token == :ident
-        case keyword.data
-        when "define"
-          return handle_define(ast)
-        when "if"
-          raise "unimplemented"
-          return handle_if()
-        end
-      end
-      handle_function_call(ast)
-    when ast.class == Object_literal
-      handle_object_literal(ast)
-    when ast.class == Block
-      handle_block(ast)
-    when ast.class == Dot_access
-      handle_dot_access(ast)
-    end
-  end
-
   def handle_token(token)
     case token.token
     when :ident
@@ -241,7 +186,7 @@ class Typer
   end
 
   def handle_object_literal(object)
-    object.fields.each { |_, f| handle_function_call f }
+    object.fields.each { |_, f| triage_function_call f }
     object.type = ObjectType.new(
       object.fields.map {|k,v| [k, v.type]}.to_h
     )

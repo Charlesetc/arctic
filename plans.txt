@@ -16,8 +16,17 @@
 
 # Bugs
 
-[] don't get parsed on toplevel if they don't match
+* `[]` don't get parsed on toplevel if they don't match
+* `( x
+    y )`
+  - When there is a newline within parentheses,
+    it stays around as the :newline token.
+  - Do a grammar pass to get rid of them.
+
+
 
 # Roadmap
 
-* Eventually compile to OCaml subset
+* Compile to js subset.
+* Bootstrap to js subset.
+* Compile to lower level language.
