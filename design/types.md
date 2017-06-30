@@ -1,12 +1,12 @@
 
 # Brie *[ types ]*
 
-Brie's type system is *structural typing*, also known as row polymorphism.
+Brie's type system has *structural typing*, also known as row polymorphism.
 
 This means that Brie cares about what an object or value *can do*, not what
 it's exact type is.
 
-Brie does not have type signatures. Brie may look like a dynamic language,
+Brie does not have type signatures, and may look like a dynamic language,
 but *all type errors appear at compile time*.
 
 So what can you do in Brie?
