@@ -115,15 +115,17 @@ class Typer
   end
 
   def execute_function(function_type)
-    @phonebook.enter
-    return_type = @phonebook.lookup_function(function_type) do |ast, arguments|
+    # @phonebook.enter
+    ret = nil
+    @phonebook.lookup_function(function_type) do |ast, arguments|
       ast.arguments.each_with_index do |name, i|
         @phonebook.insert(@file.name, name.data, arguments[i])
       end
       ast.children.each { |x| triage_function_call(x) }
+
+      ast.children.last ? ast.children.last.type : UnitType.new
     end
-    @phonebook.exit
-    return_type
+    # @phonebook.exit
   end
 
   def handle_function_call(parens)
@@ -154,7 +156,7 @@ class Typer
 
         # if equal:
         return_type = execute_function(first.type.add_arguments(arguments))
-        parens.type = return_type
+        parens.type = return_type if return_type
       end
     end
   end
@@ -181,7 +183,6 @@ class Typer
   def handle_define(item)
     # ASSERT item.children[1] exists and is ident
     # ASSERT item.children[2] exists
-    triage(item.children[2])
     @phonebook.insert(@file.name, item.children[1].data, item.children[2])
   end
 

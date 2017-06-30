@@ -24,3 +24,8 @@ end
 def same_dir_as(dirfile, newfile)
   File.dirname(dirfile) + "/" + newfile
 end
+
+def specific_fp(name, argtypes)
+  argtypes.map { |x| x.inspect }.join("_")
+  "fn_#{name}_#{argtypes}"
+end

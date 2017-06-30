@@ -1,4 +1,6 @@
 
+require_relative './utils'
+
 # triage.rb
 
 module Triage
@@ -16,7 +18,7 @@ module Triage
       # top level items
       case keyword.data
       when "define"
-        handle_define(item)
+        triage_define(item)
       when "require"
         handle_require(item)
       else
@@ -25,15 +27,20 @@ module Triage
     end
   end
 
+  def triage_define(item)
+    triage(item.children[2])
+    handle_define(item)
+  end
+
   def run_triage
     index_file
 
-    main_function = @phonebook.lookup(@file.name, "main")
-    error_ast(@file.ast, "no main function") unless main_function
+    @main_function = @phonebook.lookup(@file.name, "main")
+    error_ast(@file.ast, "no main function") unless @main_function
 
     # execute_function(main_function.type)
     # main_function.children.each { |c| triage_function_call(c) }
-    main_function.children.each { |c| triage(c) }
+    @main_function.children.each { |c| triage(c) }
   end
 
   def triage_function_call(parens)
@@ -54,7 +61,7 @@ module Triage
       if keyword and keyword.token == :ident
         case keyword.data
         when "define"
-          return handle_define(ast)
+          return triage_define(ast)
         when "if"
           raise "unimplemented"
           return handle_if()

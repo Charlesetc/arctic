@@ -12,8 +12,12 @@ class PhoneFunction
 
   def expand(argument_types)
     unless @expanded[argument_types]
-      deepcopy(@ast)
+      @expanded[argument_types] = deepcopy(@ast)
     end
+  end
+
+  def fetch(argument_types)
+    @expanded[argument_types]
   end
 
 end
@@ -64,25 +68,18 @@ class Phonebook
     @names.last[[filename, name]] = ast
   end
 
-  def lookup_function(function_type)
+  def lookup_function(function_type, method: :expand)
     phone_function = @function_literals[function_type.name]
     raise "every block should have been defined." if phone_function.nil?
     arguments = function_type.arguments
     argument_types = arguments.map { |a| a.type }
-    ast = phone_function.expand(argument_types)
+    ast = phone_function.send(method, argument_types)
 
-    if ast
-      names = @names
-      @names = phone_function.stack
-      yield(ast, arguments)
-      @names = names
-    end # else we've already typed it with these types
-
-    if ast.children.last
-      ast.children.last.type
-    else
-      UnitType.new
-    end
+    names = @names
+    @names = phone_function.stack
+    ret = yield(ast, arguments)
+    @names = names
+    ret
   end
 
   def insert_block(name, ast)
