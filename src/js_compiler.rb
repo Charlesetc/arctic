@@ -16,6 +16,9 @@ class JsCompiler
   end
 
   def handle_require(req)
+    # We handle the require's definitions
+    # by going over the 'toplevel extras'
+    req.compiled = ''
   end
 
   def compile
@@ -55,7 +58,12 @@ class JsCompiler
   def handle_token(token)
     case token.token
     when :ident
-      token.compiled = token.data
+      token.compiled =
+        if @phonebook.is_toplevel?(@file.name, token.data)
+          @file.name + "_" + token.data
+        else
+          token.data
+        end
     when :string
       token.compiled = token.data.inspect
     else
@@ -129,6 +137,17 @@ class JsCompiler
     args = @phonebook.lookup_found(block.type)
     args += block.arguments.map {|x| x.data}
     "function #{specific_fp(block.type.name, argtypes)}(#{args.join(",")}) {\n#{inner}}"
+  end
+
+  def handle_object_literal(object)
+    inner = object.fields.map do |name, ast|
+      "#{name}: #{ast.compiled}"
+    end.join(", ")
+    object.compiled = "{#{inner}}"
+  end
+
+  def handle_dot_access(dot)
+    dot.compiled = dot.child.compiled + "." + dot.name
   end
 
 end

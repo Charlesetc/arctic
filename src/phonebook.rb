@@ -8,7 +8,7 @@ class PhoneFunction
   def initialize(ast, name, stack:)
     @name = name
     @stack = stack.map { |h| h.clone }
-    @initial_stack_length = @stack.length
+    @possible_found = Set.new(stack.map {|h| h.keys}.flatten)
     @found = Set.new
     @ast = ast
     @expanded = {}
@@ -29,7 +29,7 @@ class PhoneFunction
   end
 
   def all_found
-    @found.to_a
+    (@found & @possible_found).to_a
   end
 end
 
@@ -60,6 +60,13 @@ class Phonebook
     end
     @toplevel[filename] ||= {}
     @toplevel[filename][name] # will be nil if not there
+  end
+
+  def is_toplevel?(fname, name)
+    @names.reverse.each do |chapter|
+      return false if chapter.include?(name)
+    end
+    @toplevel[fname][name]
   end
 
   def dump_definitions_for_file(filename)

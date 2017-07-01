@@ -192,14 +192,12 @@ class Typer
   end
 
   def handle_object_literal(object)
-    object.fields.each { |_, f| triage_function_call f }
     object.type = ObjectType.new(
       object.fields.map {|k,v| [k, v.type]}.to_h
     )
   end
 
   def handle_dot_access(dot)
-    triage(dot.child)
     unless dot.child.type.class == ObjectType
       error_ast_type(dot.child, expected: "object")
     end

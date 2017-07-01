@@ -1,0 +1,3 @@
+define main [
+  < x = 2, y = "hi" >
+]

@@ -69,12 +69,22 @@ module Triage
       end
       triage_function_call(ast)
     when ast.class == Object_literal
-      handle_object_literal(ast)
+      triage_object_literal(ast)
     when ast.class == Block
       handle_block(ast)
     when ast.class == Dot_access
-      handle_dot_access(ast)
+      triage_dot_access(ast)
     end
+  end
+
+  def triage_dot_access(dot)
+    triage(dot.child)
+    handle_dot_access(dot)
+  end
+
+  def triage_object_literal(object)
+    object.fields.each { |_, f| triage_function_call f }
+    handle_object_literal(object)
   end
 
 end
