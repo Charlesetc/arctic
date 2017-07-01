@@ -58,12 +58,12 @@ class Tokenizer
       when char == '>'
         advance
         save :close_angle
+      when char == '='
+        advance
+        save :ident, data: '='
       when char == "\n"
         advance
         save :newline
-      when char == '='
-        advance
-        save :equals
       when char == ','
         advance
         save :comma
@@ -151,11 +151,22 @@ class Grammar
       dot_access x
     end
 
+    # around here is where I would
+    # pass off control to macros.
+
+    collect do |x|
+      if_cleanup x
+    end
+
     collect do |x|
       binary_operator(x, ["or"])
     end
     collect do |x|
       binary_operator(x, ["and"])
+    end
+
+    collect do |x|
+      binary_operator(x, "=")
     end
 
     collect do |x|
@@ -329,7 +340,8 @@ class Grammar
         state = Equals
         nil
       when Equals
-        unless child.token == :equals
+        unless child.token == :ident and child.data == '='
+          p child
           error_ast(child,
           'expected an equals sign after the start an object field')
         end
@@ -379,6 +391,47 @@ class Grammar
     # don't forget the last one
     ast.iterate_follow do
       ast.children << last_child
+    end
+  end
+
+  def if_cleanup(ast)
+
+
+    return unless ast.class == Parens
+    first = ast.children[0]
+    return unless first
+    return unless first.token == :ident
+    return unless first.data == "if"
+
+    bindex = ast.children.index { |x| x.class == Block }
+
+    error_ast(ast, "you need to pass a block to if") if bindex.nil?
+    error_ast(ast, "if isn't given a conditon") if bindex == 1
+
+    ast.children = [
+      ast.children[0],
+      Parens.new(ast.children[1...bindex], nil)
+    ] + ast.children[bindex..-1]
+
+    if (els = ast.children[3])
+      unless els.token == :ident and els.data == "else"
+        error_ast(ast, "expected nothing or 'else', got #{els.inspect}")
+      end
+
+      error_ast(ast, "else with no predicate?") if ast.children.length == 4
+
+      # also getting rid of the else
+
+      nextone = ast.children[4]
+      if ast.children.length == 5
+        ast.children = ast.children[0..2] + [nextone]
+      elsif nextone.data != "if" or nextone.token != :ident
+        error_ast(ast, "else followed by something, but not if")
+      else
+        ast.children = ast.children[0..2] +
+          [Block.new([Parens.new(ast.children[4..-1], nil)], [], nil)]
+      end
+
     end
   end
 

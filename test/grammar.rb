@@ -1,12 +1,10 @@
 
 require 'testrocket'
 
-require_relative '../src/grammar'
+require_relative '../src/files'
 
 def ast(input)
-  t = Tokenizer.new(input)
-  g = Grammar.new(t.tokens)
-  g.produce_ast
+  StringFile.new(input).ast
 end
 
 $i = 0
@@ -17,6 +15,7 @@ def compare(input, *expected)
     found = ast(input).inspect
     passed = found == expected
   rescue
+    p input
     p "FAILED WITH EXCEPTION"
     passed = false
   end
@@ -77,6 +76,12 @@ compare "<x = (f a)>", "<x = ((:ident(f) :ident(a)))>"
 +-> { compare "this.that", ":ident(this).that" }
 +-> { compare "this.that.cool", ":ident(this).that.cool" }
 +-> { compare "(2 + 2).cool", "(:ident(+) (:ident(2)) (:ident(2))).cool" }
+
+# If-else
+#
++-> { compare "if x y z [ z ]", ":ident(if) (:ident(x) :ident(y) :ident(z)) block[][(:ident(z))]" }
++-> { compare "if x [ y ] else [ z ]", ":ident(if) (:ident(x)) block[][(:ident(y))] block[][(:ident(z))]" }
++-> { compare "if x [ y ] else if p q [ z ]", ":ident(if) (:ident(x)) block[][(:ident(y))] block[][(:ident(if) (:ident(p) :ident(q)) block[][(:ident(z))])]" }
 
 # Line numbers
 

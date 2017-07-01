@@ -171,7 +171,6 @@ class Typer
       else
         number = @phonebook.lookup(@file.name, token.data)
         if number.nil?
-          raise
           error_ast(token, "Undefined reference: #{token.data}")
         end
         token.type = number.type

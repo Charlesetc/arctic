@@ -30,3 +30,15 @@ class StdinFile < SourceFile
     ARGF.read
   end
 end
+
+# used for testing
+class StringFile < SourceFile
+  def initialize(input)
+    @input = input
+    @name = "main"
+    parse
+  end
+  def read
+    @input
+  end
+end
