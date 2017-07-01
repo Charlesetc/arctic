@@ -1,13 +1,14 @@
 
+
 @import url('https://fonts.googleapis.com/css?family=Lora|Open+Sans');
 
 * {
   padding: 0;
   margin: 0;
-  
 }
 
 body { 
+  overflow-x: hidden;
   overflow-y:scroll;
   background: #f7f7f7;
   font-family: 'Open Sans', sans-serif;
@@ -15,7 +16,6 @@ body {
   padding: 0px 30px;
   margin-top:50px;
   margin-bottom:40px;
-  max-width:600px;
   font-size: 19px;
   padding-bottom:40px;
   position: relative;
@@ -27,14 +27,6 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   font-family: 'Lora', Times, serif;
   padding-top:30px;
-}
-
-img#fox {
-  /* display:none; */
-  width:110px;
-  position: fixed;
-  left: 10px;;
-  top:10px;
 }
 
 a {
@@ -51,8 +43,15 @@ h1 {
   margin-bottom:40px;
 }
 
+h1 a, h1 a:hover {
+  color: #222;
+  text-decoration: none;
+}
+
 h1 em {
   font-size: 26px;
+  display:inline-block;
+  white-space: no-wrap;
 }
 
 h2 {
@@ -72,21 +71,16 @@ em {
 }
 
 #nav {
-  text-align: right;
-  float: right;
-  padding-right: 30px;
-  padding-top:30px;
+  list-style-type: none;
 }
 
 #nav li {
-  display: inline;
+  padding-bottom:4px;
 }
 
 #nav li a {
   text-decoration: none;
   color: #222;
-  padding-right: 10px;
-  padding-left: 10px;
   position:relative;
   right: -15%;
 }
@@ -127,3 +121,51 @@ pre code {
   margin-top:30px;
   margin-bottom:30px;
 }
+
+@media screen and (min-width: 800px) {
+  body {
+    max-width:600px;
+  }
+  img#fox {
+    position: fixed;
+    width:110px;
+    left: calc(50% - 450px);
+    top:10px;
+  }
+
+  #nav {
+    position: absolute;
+    top: -30px;
+    right: 30px;
+    text-align: right;
+    /* float: right; */
+    padding-right: 7px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  body {
+    max-width: inherit;
+    padding-top:30px;
+  }
+  img#fox {
+    position: absolute;
+    left:-15px;
+    width:70px;
+    top:-54px;
+  }
+
+  #nav {
+    position: absolute;
+    top:0px;
+    left:20px;
+    width: 80%;
+  }
+
+  #nav li {
+    display: inline;
+    padding-right:10px;
+  }
+}
+
+

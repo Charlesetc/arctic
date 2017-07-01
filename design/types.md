@@ -1,5 +1,5 @@
 
-# Brie *[ types ]*
+# [Brie](/) *[ types ]*
 
 Brie's type system has *structural typing*, also known as row polymorphism.
 
@@ -72,3 +72,5 @@ its structural typing.
 OCaml comes the closest, as it's also type-inferred and has structural
 types in objects. However, OCaml very rarely uses its object system and OCaml
 uses dynamic dispatch for method calls.
+
+To learn more about Brie, check out [the book](/book.html)!

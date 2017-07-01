@@ -1,25 +1,30 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta name="generator" content="pandoc" />
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title></title>
   <style type="text/css">code{white-space: pre;}</style>
-  <link rel="stylesheet" href="style.css" type="text/css" />
+  <link rel="stylesheet" href="style.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
   
   
   <ul id='nav'>
-    <li><a href='./'>Brie</a></li>
+    <li><a href='/'>Home</a></li>
     <li><a href='./syntax.html'>Syntax</a></li>
     <li><a href='./types.html'>Types</a></li>
+    <li><a href='https://github.com/charlesetc/brie'>Install</a></li>
+    <li><a href='./book.html'>Book</a></li>
   </ul>
   
   
   <a href='#' style='cursor:default'/><img src="./fox.gif" alt="a drawing of a fox" id='fox' /></a>
 </head>
 <body>
-<h1 id="brie-types">Brie <em>[ types ]</em></h1>
+<h1 id="brie-types"><a href="/">Brie</a> <em>[ types ]</em></h1>
 <p>Brie's type system has <em>structural typing</em>, also known as row polymorphism.</p>
 <p>This means that Brie cares about what an object or value <em>can do</em>, not what it's exact type is.</p>
 <p>Brie does not have type signatures, and may look like a dynamic language, but <em>all type errors appear at compile time</em>.</p>
@@ -56,5 +61,6 @@ print_sides lobster</code></pre>
 <p>Yes, several have structural typing, including OCaml, Go, and Scala.</p>
 <p>Brie is the only one, however, with type inference and a standard library that takes advantage of its structural typing.</p>
 <p>OCaml comes the closest, as it's also type-inferred and has structural types in objects. However, OCaml very rarely uses its object system and OCaml uses dynamic dispatch for method calls.</p>
+<p>To learn more about Brie, check out <a href="/book.html">the book</a>!</p>
 </body>
 </html>

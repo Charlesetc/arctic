@@ -1,6 +1,6 @@
 
 
-# Brie *[ syntax ]*
+# [Brie](/) *[ syntax ]*
 
 Brie's syntax starts with the syntax of a basic ml language like Haskell.
 ```

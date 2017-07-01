@@ -1,5 +1,5 @@
 
-# Brie
+# [Brie](/)
 
 > Mix some *Ruby* and some *OCaml* in a bowl.
 > Kneed well with some *macros*.
@@ -14,3 +14,5 @@ define main [
 ```
 
 Brie is a compiled, type-checked, scripting language.
+
+For an overview, try out the [syntax](/syntax.html) or [type system](/types.html). Or jump straight into the [book](/book.html)!
