@@ -116,7 +116,8 @@ class JsCompiler
   end
 
   def handle_block(block)
-    block.compiled = 'new_closure()'
+    found = @phonebook.lookup_found(block.type).join(",")
+    block.compiled = "new_closure().fill_in_arguments(#{found})"
   end
 
   def generate_function_definition(block, argtypes)
@@ -125,8 +126,9 @@ class JsCompiler
       "\t" + child.compiled + "\n"
     end.join
 
-    args = block.arguments.map {|x| x.data}.join(",")
-    "function #{specific_fp(block.type.name, argtypes)}(#{args}) {\n#{inner}}"
+    args = @phonebook.lookup_found(block.type)
+    args += block.arguments.map {|x| x.data}
+    "function #{specific_fp(block.type.name, argtypes)}(#{args.join(",")}) {\n#{inner}}"
   end
 
 end
