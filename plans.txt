@@ -22,11 +22,11 @@
   - When there is a newline within parentheses,
     it stays around as the :newline token.
   - Do a grammar pass to get rid of them.
-
-
+* Compiler 'require' doesn't handle directories at all.
+  - also fix tests that use this.
 
 # Roadmap
 
-* Compile to js subset.
-* Bootstrap to js subset.
-* Compile to lower level language.
+[ ] Compile to js subset.
+[ ] Bootstrap to js subset.
+[ ] Compile to lower level language.

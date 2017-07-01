@@ -2,11 +2,14 @@
 require './src/files'
 require './src/typer'
 require './src/grammar'
+require './src/js_compiler'
+require './src/phonebook'
 require 'testrocket'
 
 
 suites = [
   :typer,
+  :js_compiler,
 ]
 
 def record(suite)
@@ -38,6 +41,13 @@ def typer(filename)
   file = SourceFile.new(filename)
   Typer.new(file).run
   file.ast.inspect_types
+end
+
+def js_compiler(filename)
+  file = SourceFile.new(filename)
+  phonebook = Phonebook.new
+  Typer.new(file, phonebook: phonebook).run
+  JsCompiler.new(file, phonebook).compile
 end
 
 

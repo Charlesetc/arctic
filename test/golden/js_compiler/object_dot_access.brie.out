@@ -1,0 +1,4 @@
+function main() {
+	var x = {y: 3};
+	x.y
+}

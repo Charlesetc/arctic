@@ -1,0 +1,8 @@
+function fn_2_Integer_String_Function(x,y,z) {
+	x
+}
+function main() {
+	var f = new_closure().fill_in_arguments();
+	var y = new_closure().fill_in_arguments();
+	f.fill_in_arguments(2,"hi",y).call(fn_2_Integer_String_Function)
+}
