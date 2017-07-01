@@ -25,7 +25,10 @@ def same_dir_as(dirfile, newfile)
   File.dirname(dirfile) + "/" + newfile
 end
 
-def specific_fp(name, argtypes)
-  tps = argtypes.map { |x| x.inspect }.join("_")
+def specific_fp(name, arguments)
+  unless arguments[0].is_a?(Type)
+    arguments = arguments.map { |x| x.type }
+  end
+  tps = arguments.map { |x| x.inspect }.join("_")
   "fn_#{name}_#{tps}"
 end

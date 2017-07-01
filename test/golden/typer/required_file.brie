@@ -1,5 +1,9 @@
 
-define example_function [ < x = 2 > ]
+define example_function [
+  define y 2
+  < x = y >
+  -- < x = 2 >
+]
 
 define main [
   -- technically this will be parsed as a test

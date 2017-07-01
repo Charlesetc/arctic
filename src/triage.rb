@@ -18,7 +18,7 @@ module Triage
       # top level items
       case keyword.data
       when "define"
-        triage_define(item)
+        triage_define(item, toplevel: true)
       when "require"
         handle_require(item)
       else
@@ -27,9 +27,9 @@ module Triage
     end
   end
 
-  def triage_define(item)
+  def triage_define(item, toplevel: false)
     triage(item.children[2])
-    handle_define(item)
+    handle_define(item, toplevel: toplevel)
   end
 
   def run_triage

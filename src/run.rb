@@ -14,6 +14,7 @@ phonebook = Phonebook.new
 
 Typer.new(file, phonebook: phonebook).run
 
+puts
 puts JsCompiler.new(file, phonebook).compile
 
 # puts file.ast.inspect_types

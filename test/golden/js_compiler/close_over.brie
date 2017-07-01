@@ -1,0 +1,6 @@
+
+define main [
+  define x 3
+  define f [ x ]
+  f ()
+]

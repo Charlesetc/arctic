@@ -119,9 +119,9 @@ class Typer
     ret = nil
     @phonebook.lookup_function(function_type) do |ast, arguments|
       ast.arguments.each_with_index do |name, i|
-        @phonebook.insert(@file.name, name.data, arguments[i])
+        @phonebook.insert(name.data, arguments[i])
       end
-      ast.children.each { |x| triage_function_call(x) }
+      ast.children.each { |x| triage(x) }
 
       ast.children.last ? ast.children.last.type : UnitType.new
     end
@@ -171,6 +171,7 @@ class Typer
       else
         number = @phonebook.lookup(@file.name, token.data)
         if number.nil?
+          raise
           error_ast(token, "Undefined reference: #{token.data}")
         end
         token.type = number.type
@@ -180,10 +181,14 @@ class Typer
     end
   end
 
-  def handle_define(item)
+  def handle_define(item, toplevel:)
     # ASSERT item.children[1] exists and is ident
     # ASSERT item.children[2] exists
-    @phonebook.insert(@file.name, item.children[1].data, item.children[2])
+    if toplevel
+      @phonebook.insert_toplevel(@file.name, item.children[1].data, item.children[2])
+    else
+      @phonebook.insert(item.children[1].data, item.children[2])
+    end
   end
 
   def handle_object_literal(object)
@@ -252,7 +257,7 @@ class Typer
 
     # define it locally
     #
-    @phonebook.insert(@file.name, item.children[1].data, object)
+    @phonebook.insert_toplevel(@file.name, item.children[1].data, object)
   end
 end
 

@@ -1,0 +1,5 @@
+require close_over
+
+define main [
+  close_over.main ()
+]

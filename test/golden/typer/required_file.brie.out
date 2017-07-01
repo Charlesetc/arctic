@@ -1,1 +1,1 @@
-root[(ident(define):: ident(example_function):: block[][(<x = (ident(2)::)::>::)::]::Function)::, (ident(define):: ident(main):: block[][((ident(example_function)::Function ()::Unit)::<x = Integer>.x::Integer)::Integer]::Function)::]::
+root[(ident(define):: ident(example_function):: block[][(ident(define):: ident(y):: ident(2)::)::, (<x = (ident(y)::)::>::)::]::Function)::, (ident(define):: ident(main):: block[][((ident(example_function)::Function ()::Unit)::<x = Integer>.x::Integer)::Integer]::Function)::]::

@@ -15,13 +15,36 @@ class JsCompiler
     @file = file
   end
 
+  def handle_require(req)
+  end
+
   def compile
     run_triage
 
+    output = []
+
+    @phonebook.each_expansion do |ast, argtypes|
+      output << generate_function_definition(ast, argtypes)
+    end
+
+    # this is supposed to be where we handle
+    # things that have been defined on the toplevel
+    # but aren't functions. (Function calls require
+    # extra logic to compile-time-dispatch on their types.)
+    # one example is imported objects.
+    @phonebook.toplevel_extras do |filename, name, ast|
+      triage(ast)
+      output << "var #{filename}_#{name} = #{ast.compiled}"
+    end
+    output << generate_main_function
+
+    output.join "\n"
+  end
+
+  def generate_main_function
     inner = @main_function.children.map do |child|
       "\t" + child.compiled + "\n"
     end.join
-
     "function main() {\n#{inner}}"
   end
 
@@ -40,7 +63,7 @@ class JsCompiler
     end
   end
 
-  def handle_define(item)
+  def handle_define(item, toplevel:)
     item.compiled =
       "var #{item.children[1].data} = #{item.children[2].compiled};"
   end
@@ -86,15 +109,24 @@ class JsCompiler
       function_type,
       method: :fetch
     ) do |ast, arguments|
-      argtypes = arguments.map { |x| x.type }
       triage(ast)
 
-      ".call(#{specific_fp(function_type.name, argtypes)})"
+      ".call(#{specific_fp(function_type.name, arguments)})"
     end
   end
 
   def handle_block(block)
     block.compiled = 'new_closure()'
+  end
+
+  def generate_function_definition(block, argtypes)
+    inner = block.children.map do |child|
+      triage(child) unless child.compiled
+      "\t" + child.compiled + "\n"
+    end.join
+
+    args = block.arguments.map {|x| x.data}.join(",")
+    "function #{specific_fp(block.type.name, argtypes)}(#{args}) {\n#{inner}}"
   end
 
 end
