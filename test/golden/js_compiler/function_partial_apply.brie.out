@@ -1,13 +1,13 @@
 function fn_2_Integer_Function_String(x,y,z) {
-	x
+	return x;
 }
 function fn_2_Integer_String_Function(x,y,z) {
-	x
+	return x;
 }
 function main() {
 	var f = new_closure().fill_in_arguments();
 	var y = new_closure().fill_in_arguments();
 	var f = f.fill_in_arguments(2);
-	f.fill_in_arguments(y,"hi").call(fn_2_Integer_Function_String)
-	f.fill_in_arguments("hi",y).call(fn_2_Integer_String_Function)
+	f.fill_in_arguments(y,"hi").call(fn_2_Integer_Function_String);
+	return f.fill_in_arguments("hi",y).call(fn_2_Integer_String_Function);
 }

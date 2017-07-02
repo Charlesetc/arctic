@@ -1,0 +1,31 @@
+
+-- I think one common problem will be
+-- that if statement branches have to
+-- match.
+
+-- there could be an ast transformation
+-- that looks for things like this:
+
+define main : flag [
+  if flag [
+    print "hello you"
+  ] else [
+    print "wow then"
+  ]
+]
+
+-- and transform that ast to this:
+
+define main : flag [
+  if flag [
+    print "hello you"
+    ()
+  ] else [
+    print "wow then"
+    ()
+  ]
+]
+
+-- but only when the return value is never checked
+-- i.e. if it's in the middle of a block without
+-- any define or similar thing.

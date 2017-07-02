@@ -1,0 +1,4 @@
+function main() {
+	if (true) {3;} else {2;};
+	return false;
+}

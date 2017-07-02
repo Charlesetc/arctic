@@ -1,0 +1,11 @@
+define main [
+  if false [
+    1
+  ] else if false [
+    2
+  ] else if false [
+    3
+  ] else [
+    4
+  ]
+]

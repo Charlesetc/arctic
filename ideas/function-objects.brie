@@ -13,7 +13,6 @@ class Fox [
 
 f = Fox.new
 
-
 -- call method
 f.call 2
 

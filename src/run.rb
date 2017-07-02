@@ -12,8 +12,8 @@ require_relative './js_compiler'
 file = StdinFile.new
 phonebook = Phonebook.new
 
-# Typer.new(file, phonebook: phonebook).run
+Typer.new(file, phonebook: phonebook).run
 
 puts
-# puts JsCompiler.new(file, phonebook).compile
-puts file.ast.inspect
+puts JsCompiler.new(file, phonebook).compile
+# puts file.ast.inspect

@@ -17,6 +17,8 @@ define main : file [
 -- ./readfile -file text.txt
 -- AND
 -- ./readfile -f text.txt
+-- AND
+-- ./readfile text.txt
 
 -- Automatically!!
 

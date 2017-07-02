@@ -45,9 +45,14 @@ class JsCompiler
   end
 
   def generate_main_function
-    inner = @main_function.children.map do |child|
-      "\t" + child.compiled + "\n"
-    end.join
+    items = @main_function.children
+    items.each do |child|
+      triage(child) unless child.compiled
+    end
+    label_return(items[-1]) if items[-1]
+
+    inner = items.map { |x| "\t#{x.compiled};\n" }.join
+
     "function main() {\n#{inner}}"
   end
 
@@ -71,9 +76,35 @@ class JsCompiler
     end
   end
 
+  def handle_true(token)
+    token.compiled = "true"
+  end
+
+  def handle_false(token)
+    token.compiled = "false"
+  end
+
+  def handle_if(ifstmt)
+
+    condition = ifstmt.children[1].compiled
+    inner_if = ifstmt.children[2].children.map do |c|
+      c.compiled + ';'
+    end.join("\n")
+
+    inner_else = if ifstmt.children[3]
+                   ifstmt.children[3].children.map do |c|
+                     c.compiled + ';'
+                   end.join("\n")
+                 else
+                   ''
+                 end
+    ifstmt.compiled = "if (#{condition}) {#{inner_if}} else {#{inner_else}}"
+
+  end
+
   def handle_define(item, toplevel:)
     item.compiled =
-      "var #{item.children[1].data} = #{item.children[2].compiled};"
+      "var #{item.children[1].data} = #{item.children[2].compiled}"
   end
 
   def handle_function_call(parens)
@@ -129,10 +160,13 @@ class JsCompiler
   end
 
   def generate_function_definition(block, argtypes)
-    inner = block.children.map do |child|
+    items = block.children
+    items.each do |child|
       triage(child) unless child.compiled
-      "\t" + child.compiled + "\n"
-    end.join
+    end
+    label_return(items[-1]) if items[-1]
+
+    inner = items.map { |x| "\t#{x.compiled};\n" }.join
 
     args = @phonebook.lookup_found(block.type)
     args += block.arguments.map {|x| x.data}
@@ -148,6 +182,38 @@ class JsCompiler
 
   def handle_dot_access(dot)
     dot.compiled = dot.child.compiled + "." + dot.name
+  end
+
+
+  #
+  # Helpers
+  #
+
+  def if_label(item)
+    return unless item.class == Parens
+    return unless item.children[0]
+    return unless item.children[0].token == :ident
+    return unless item.children[0].data == "if"
+
+
+    if item.children[3]
+      ret1 = item.children[2].children.last
+      label_return(ret1)
+      ret2 = item.children[3].children.last
+      label_return(ret2)
+
+      # recompile the last part to
+      # include the return...
+      handle_if(item)
+    else
+      item.compiled = item.compiled + ' ; return __unit'
+    end
+    true
+  end
+
+  def label_return(item)
+    return if if_label(item)
+    item.compiled = 'return ' + item.compiled
   end
 
 end

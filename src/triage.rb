@@ -63,8 +63,11 @@ module Triage
         when "define"
           return triage_define(ast)
         when "if"
-          raise "unimplemented"
-          return handle_if()
+          return triage_if(ast)
+        when "true"
+          return handle_true(ast)
+        when "false"
+          return handle_false(ast)
         end
       end
       triage_function_call(ast)
@@ -75,6 +78,25 @@ module Triage
     when ast.class == Dot_access
       triage_dot_access(ast)
     end
+  end
+
+  def triage_if(ifstmt)
+    # conditional
+    triage(ifstmt.children[1])
+
+    # it's a block:
+    ifstmt.children[2].children.each do |child|
+      triage(child)
+    end
+
+    #something about entering/exiting the phonebook.
+    if (elsestmt = ifstmt.children[3])
+      elsestmt.children.each do |child|
+        triage(child)
+      end
+    end
+
+    handle_if(ifstmt)
   end
 
   def triage_dot_access(dot)

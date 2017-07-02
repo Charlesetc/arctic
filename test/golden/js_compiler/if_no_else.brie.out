@@ -1,0 +1,3 @@
+function main() {
+	if (true) {3;} else {} ; return __unit;
+}

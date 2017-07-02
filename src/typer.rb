@@ -41,6 +41,7 @@ end
 class IntegerType < Type ; end
 class FloatType < Type ; end
 class StringType < Type ; end
+class BoolType < Type ; end
 class UnitType < Type ; end
 
 class FunctionType < Type
@@ -128,6 +129,33 @@ class Typer
     # @phonebook.exit
   end
 
+  def handle_if(ifstmt)
+    c = ifstmt.children
+
+    unless c[1].type.class == BoolType
+      error_ast_type(c[1], expected: "a boolean")
+    end
+
+    if c[3]
+      ifret = c[2].children.last
+      elseret = c[3].children.last
+
+      ifrett = ifret ? ifret.type : UnitType.new
+      elserett = elseret ? elseret.type : UnitType.new
+
+      unless ifrett == elserett
+        error_ast_type(ifret, expected: "#{elserett.inspect}, because if statement branches must have the same return type")
+      end
+      ifstmt.type = ifrett
+    else
+      # if statements that don't have else branches
+      # will always return unit.
+      # Specifically, whatever the last item of their
+      # block is, it's not paid attention to.
+      ifstmt.type = UnitType.new
+    end
+  end
+
   def handle_function_call(parens)
     first = parens.children[0]
     case parens.children.length
@@ -159,6 +187,14 @@ class Typer
         parens.type = return_type if return_type
       end
     end
+  end
+
+  def handle_true(token)
+    token.type = BoolType.new
+  end
+
+  def handle_false(token)
+    token.type = BoolType.new
   end
 
   def handle_token(token)

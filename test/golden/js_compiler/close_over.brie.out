@@ -1,8 +1,8 @@
 function fn_2_(x) {
-	x
+	return x;
 }
 function main() {
 	var x = 3;
 	var f = new_closure().fill_in_arguments(x);
-	f.fill_in_arguments().call(fn_2_)
+	return f.fill_in_arguments().call(fn_2_);
 }
