@@ -83,6 +83,11 @@ compare "<x = (f a)>", "<x = ((:ident(f) :ident(a)))>"
 +-> { compare "if x [ y ] else [ z ]", ":ident(if) (:ident(x)) block[][(:ident(y))] block[][(:ident(z))]" }
 +-> { compare "if x [ y ] else if p q [ z ]", ":ident(if) (:ident(x)) block[][(:ident(y))] block[][(:ident(if) (:ident(p) :ident(q)) block[][(:ident(z))])]" }
 
+# While
+#
++-> { compare "while x = z [ z ]", ":ident(while) (:ident(=) (:ident(x)) (:ident(z))) block[][(:ident(z))]" }
+
+
 # Line numbers
 
 +-> {

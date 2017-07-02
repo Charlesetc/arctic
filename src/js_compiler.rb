@@ -46,6 +46,8 @@ class JsCompiler
 
   def generate_main_function
     items = @main_function.children
+
+    # I should delete these lines:
     items.each do |child|
       triage(child) unless child.compiled
     end
@@ -57,7 +59,7 @@ class JsCompiler
   end
 
   def before_triage(ast)
-    raise "already triaged" if ast.compiled
+    raise "already compiled" if ast.compiled
   end
 
   def handle_token(token)
@@ -82,6 +84,14 @@ class JsCompiler
 
   def handle_false(token)
     token.compiled = "false"
+  end
+
+  def handle_while(stmt)
+    condition = stmt.children[1].compiled
+    inner = stmt.children[2].children.map do |c|
+      c.compiled + ';'
+    end.join("\n")
+    stmt.compiled = "while (#{condition}) {#{inner}}"
   end
 
   def handle_if(ifstmt)
@@ -189,6 +199,16 @@ class JsCompiler
   # Helpers
   #
 
+  def while_label(item)
+    return unless item.class == Parens
+    return unless item.children[0]
+    return unless item.children[0].token == :ident
+    return unless item.children[0].data == "while"
+    item.compiled = item.compiled + ' ; return __unit'
+    true
+  end
+
+
   def if_label(item)
     return unless item.class == Parens
     return unless item.children[0]
@@ -213,6 +233,7 @@ class JsCompiler
 
   def label_return(item)
     return if if_label(item)
+    return if while_label(item)
     item.compiled = 'return ' + item.compiled
   end
 

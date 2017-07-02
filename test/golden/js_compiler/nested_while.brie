@@ -1,0 +1,8 @@
+define main [
+  while true [
+    while true [
+      3
+    ]
+    4
+  ]
+]

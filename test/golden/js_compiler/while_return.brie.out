@@ -1,0 +1,3 @@
+function main() {
+	while (true) {3;} ; return __unit;
+}

@@ -159,6 +159,10 @@ class Grammar
     end
 
     collect do |x|
+      while_cleanup x
+    end
+
+    collect do |x|
       binary_operator(x, ["or"])
     end
     collect do |x|
@@ -392,6 +396,22 @@ class Grammar
     ast.iterate_follow do
       ast.children << last_child
     end
+  end
+
+  def while_cleanup(ast)
+    return unless ast.class == Parens
+    first = ast.children[0]
+    return unless first
+    return unless first.token == :ident
+    return unless first.data == "while"
+
+    bindex = ast.children.index { |x| x.class == Block }
+    error_ast(ast, "you need to pass a block to while") if bindex.nil?
+    error_ast(ast, "while isn't given a conditon") if bindex == 1
+    ast.children = [
+      ast.children[0],
+      Parens.new(ast.children[1...bindex], nil)
+    ] + ast.children[bindex..-1]
   end
 
   def if_cleanup(ast)

@@ -64,6 +64,8 @@ module Triage
           return triage_define(ast)
         when "if"
           return triage_if(ast)
+        when "while"
+          return triage_while(ast)
         when "true"
           return handle_true(ast)
         when "false"
@@ -78,6 +80,16 @@ module Triage
     when ast.class == Dot_access
       triage_dot_access(ast)
     end
+  end
+
+  def triage_while(stmt)
+    triage(stmt.children[1])
+
+    stmt.children[2].children.each do |child|
+      triage(child)
+    end
+
+    handle_while(stmt)
   end
 
   def triage_if(ifstmt)

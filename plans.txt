@@ -2,12 +2,12 @@
 # Features
 
 * module system
+* polymorphic variants
+* classes
 
 # Parsing
 
 * add `let =` syntax
-* if statements
-* while statements
 * support semicolons in blocks.
 * parse floats correctly
 * 'define' can take infinitely many args -- problem

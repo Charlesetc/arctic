@@ -129,6 +129,14 @@ class Typer
     # @phonebook.exit
   end
 
+  def handle_while(stmt)
+    # I'm not sure what to make
+    # of a return value from a while
+    # statement... it seems
+    # like a pretty imperative thing.
+    stmt.type = UnitType.new
+  end
+
   def handle_if(ifstmt)
     c = ifstmt.children
 
