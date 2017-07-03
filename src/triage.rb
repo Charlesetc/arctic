@@ -54,7 +54,13 @@ module Triage
     before_triage(ast)
     case
     when ast.class == Token
-      handle_token(ast)
+      if ast.token == :ident and ast.data == "true"
+        return handle_true(ast)
+      elsif ast.token == :ident and ast.data == "false"
+        return handle_false(ast)
+      else
+        handle_token(ast)
+      end
     when ast.class == Parens
       keyword = ast.children[0]
       # assuming nonempty parens at the moment
@@ -66,10 +72,6 @@ module Triage
           return triage_if(ast)
         when "while"
           return triage_while(ast)
-        when "true"
-          return handle_true(ast)
-        when "false"
-          return handle_false(ast)
         end
       end
 

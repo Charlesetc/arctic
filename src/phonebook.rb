@@ -38,6 +38,8 @@ end
 class Phonebook
   # Something that keeps track of names
 
+  attr_reader :function_literals
+
   def initialize
     @names = [{}]
     @toplevel = {}

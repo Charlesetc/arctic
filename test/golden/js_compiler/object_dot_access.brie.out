@@ -1,4 +1,6 @@
+const global_functions = {1: {}};
 function main() {
 	var x = {y: 3};
 	return x.y;
 }
+console.log(main());

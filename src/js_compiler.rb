@@ -26,6 +26,8 @@ class JsCompiler
 
     output = []
 
+    output << js_global_functions
+
     @phonebook.each_expansion do |ast, argtypes|
       output << generate_function_definition(ast, argtypes)
     end
@@ -39,9 +41,21 @@ class JsCompiler
       triage(ast)
       output << "var #{filename}_#{name} = #{ast.compiled}"
     end
+
     output << generate_main_function
+    output << call_main_function
 
     output.join "\n"
+  end
+
+  def js_global_functions
+    inner = @phonebook.function_literals.map do |name, phone|
+      inner = phone.expanded.keys.map do |types|
+        "\"#{types.join(',')}\": #{specific_fp(name, types)}"
+      end.join(",")
+      "#{name}: {#{inner}}"
+    end.join(",")
+    "const global_functions = {#{inner}};"
   end
 
   def generate_main_function
@@ -56,6 +70,10 @@ class JsCompiler
     inner = items.map { |x| "\t#{x.compiled};\n" }.join
 
     "function main() {\n#{inner}}"
+  end
+
+  def call_main_function
+    "console.log(main());"
   end
 
   def before_triage(ast)
@@ -150,7 +168,7 @@ class JsCompiler
     raise "expected block ast to have single name" unless block.type.names.length == 1
 
     args_to_new_closure = [name] + @phonebook.lookup_found(name)
-    block.compiled = "new _closure(#{args_to_new_closure.join(",")})"
+    block.compiled = "new_closure(#{args_to_new_closure.join(",")})"
   end
 
   def generate_function_definition(block, argtypes)

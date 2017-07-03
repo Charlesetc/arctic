@@ -1,8 +1,10 @@
+const global_functions = {1: {},2: {"Integer,String,Function": fn_2_Integer_String_Function},3: {}};
 function fn_2_Integer_String_Function(x,y,z) {
 	return x;
 }
 function main() {
-	var f = new _closure(2);
-	var y = new _closure(3);
+	var f = new_closure(2);
+	var y = new_closure(3);
 	return f.partial(2, "Integer").partial("hi", "String").partial(y, "Function").call();
 }
+console.log(main());

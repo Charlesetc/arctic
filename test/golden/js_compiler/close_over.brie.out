@@ -1,8 +1,10 @@
+const global_functions = {1: {},2: {"": fn_2_}};
 function fn_2_(x) {
 	return x;
 }
 function main() {
 	var x = 3;
-	var f = new _closure(2,x);
+	var f = new_closure(2,x);
 	return f.partial(__unit, "Unit").call();
 }
+console.log(main());

@@ -1,4 +1,6 @@
+const global_functions = {1: {}};
 function main() {
 	if (true) {3;} else {2;};
 	return false;
 }
+console.log(main());

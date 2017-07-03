@@ -1,4 +1,6 @@
+const global_functions = {1: {}};
 function main() {
 	while (true) {2;};
 	return 3;
 }
+console.log(main());

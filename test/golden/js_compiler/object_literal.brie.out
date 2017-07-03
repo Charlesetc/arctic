@@ -1,3 +1,5 @@
+const global_functions = {1: {}};
 function main() {
 	return {x: 2, y: "hi"};
 }
+console.log(main());

@@ -1,3 +1,5 @@
+const global_functions = {1: {}};
 function main() {
 	while (true) {3;} ; return __unit;
 }
+console.log(main());
