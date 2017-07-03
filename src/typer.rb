@@ -45,21 +45,21 @@ class BoolType < Type ; end
 class UnitType < Type ; end
 
 class FunctionType < Type
-  attr_reader :name, :arity, :arguments
-  def initialize(name, arity, arguments: [])
+  attr_reader :names, :arity, :arguments
+  def initialize(names, arity, arguments: [])
     # keep a reference to the
     # initial function definition
     # just because functions
     # can be passed around and
     # added arguments to.
-    @name = name
+    @names = names
     @arity = arity
     @arguments = arguments
   end
 
   def add_arguments(arguments)
     FunctionType.new(
-      @name,
+      @names,
       @arity - arguments.length,
       arguments: @arguments + arguments
     )
@@ -76,6 +76,41 @@ class ObjectType < Type
       "#{name} = #{type.inspect}"
     end.join(", ")
     "<#{inner}>"
+  end
+end
+
+class VariantType < Type
+  attr_accessor :kinds, :kind_locations
+
+  def initialize(kind, argtypes, location)
+    @kinds = {kind => argtypes}
+    @kind_locations = {kind => location}
+  end
+
+  def merge(other, reason:, ast_for_error:)
+    @kinds.each do |k, v|
+      if other.kinds[k] and other.kinds[k] != v
+        error_ast(ast_for_error,
+                  "merging variables: " +
+                  "found for name #{k} type #{v} " +
+                  "at #{@kind_locations[k]}" +
+                  "but also found type #{other.kinds[k]} " +
+                  "at #{other.kind_locations[k]}"
+                 )
+      end
+    end
+
+    newone = self.clone
+    newone.kinds = kinds.merge(other.kinds)
+    # not sure if this is needed:
+    newone.kind_locations = kind_locations.clone
+    newone
+  end
+  def inspect
+    inner = @kinds.map do |name, argtypes|
+      name + " " + argtypes.map { |x| x.inspect }.join(" ")
+    end.join(", ")
+    "[^ #{inner} ]"
   end
 end
 
@@ -116,17 +151,17 @@ class Typer
   end
 
   def execute_function(function_type)
-    # @phonebook.enter
-    ret = nil
-    @phonebook.lookup_function(function_type) do |ast, arguments|
-      ast.arguments.each_with_index do |name, i|
-        @phonebook.insert(name.data, arguments[i])
-      end
-      ast.children.each { |x| triage(x) }
+    returned_values =
+      @phonebook.lookup_function(function_type) do |ast, arguments|
+        ast.arguments.each_with_index do |name, i|
+          @phonebook.insert(name.data, arguments[i])
+        end
+        ast.children.each { |x| triage(x) }
 
-      ast.children.last ? ast.children.last.type : UnitType.new
-    end
-    # @phonebook.exit
+        ast.children.last ? ast.children.last.type : UnitType.new
+      end
+    # assert these are all equal and return it
+    returned_values[0]
   end
 
   def handle_while(stmt)
@@ -253,10 +288,13 @@ class Typer
     end
   end
 
+  def handle_variant(parens)
+  end
+
   def handle_block(block)
     name = @phonebook.closure_number
     block.type = FunctionType.new(
-      name,
+      [name],
       block.arguments.length
     )
     @phonebook.insert_block(name, block)

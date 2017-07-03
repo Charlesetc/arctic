@@ -19,8 +19,8 @@ def record(suite)
   end
 end
 
-def check(suite)
-  Dir.glob("test/golden/#{suite}/*.brie") do |filename|
+def check(suite, name: "*")
+  Dir.glob("test/golden/#{suite}/#{name}.brie") do |filename|
     print "  #{File.basename(filename, ".brie")} -- "
     out = self.send(suite, filename)
     begin
@@ -60,6 +60,10 @@ when 'record'
 when 'check'
   suites.each do |suite|
     puts "#{suite}:"
-    check suite
+    if ARGV[1]
+      check(suite, name: ARGV[1])
+    else
+      check(suite)
+    end
   end
 end

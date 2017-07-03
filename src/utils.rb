@@ -32,3 +32,7 @@ def specific_fp(name, arguments)
   tps = arguments.map { |x| x.inspect }.join("_")
   "fn_#{name}_#{tps}"
 end
+
+def partial_call(x)
+  ".partial(#{x.compiled}, \"#{x.type.inspect}\")"
+end

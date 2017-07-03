@@ -3,6 +3,6 @@ function fn_2_(x) {
 }
 function main() {
 	var x = 3;
-	var f = new_closure().fill_in_arguments(x);
-	return f.fill_in_arguments().call(fn_2_);
+	var f = new _closure(2,x);
+	return f.partial(__unit, "Unit").call();
 }

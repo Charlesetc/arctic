@@ -1,0 +1,7 @@
+
+-- This is a pretty easy one I think
+-- basically:
+
+"hi there" --> "hi there"
+"hi there \(you)!" --> "hi there " + you + "!"
+

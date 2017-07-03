@@ -1,5 +1,6 @@
 
 require 'set'
+require_relative './utils'
 
 class PhoneFunction
 
@@ -31,6 +32,7 @@ class PhoneFunction
   def all_found
     (@found & @possible_found).to_a
   end
+
 end
 
 class Phonebook
@@ -83,27 +85,30 @@ class Phonebook
     @toplevel[filename][name] = ast
   end
 
-  def lookup_found(function_type)
-    phone_function = @function_literals[function_type.name]
+  def lookup_found(name)
+    phone_function = @function_literals[name]
     phone_function.all_found
   end
 
   def lookup_function(function_type, method: :expand)
-    phone_function = @function_literals[function_type.name]
-    raise "every block should have been defined." if phone_function.nil?
-    arguments = function_type.arguments
-    argument_types = arguments.map { |a| a.type }
-    ast = phone_function.send(method, argument_types)
+    rets = []
+    function_type.names.each do |name|
+      phone_function = @function_literals[name]
+      raise "every block should have been defined." if phone_function.nil?
+      arguments = function_type.arguments
+      argument_types = arguments.map { |a| a.type }
+      ast = phone_function.send(method, argument_types)
 
-    names = @names
+      names = @names
 
-    @names = phone_function.stack
-    @current_phone_function = phone_function
-    ret = yield(ast, arguments)
-    @current_phone_function = nil
-    @names = names
+      @names = phone_function.stack
+      @current_phone_function = phone_function
+      rets << yield(ast, arguments)
+      @current_phone_function = nil
+      @names = names
+    end
 
-    ret
+    rets
   end
 
   def insert_block(name, ast)

@@ -1,12 +1,12 @@
 function fn_1_() {
 	var x = 3;
-	var f = new_closure().fill_in_arguments(x);
-	return f.fill_in_arguments().call(fn_3_);
+	var f = new _closure(3,x);
+	return f.partial(__unit, "Unit").call();
 }
 function fn_3_(x) {
 	return x;
 }
-var test/golden/js_compiler/close_over_require.brie_close_over = {main: new_closure().fill_in_arguments()}
+var test/golden/js_compiler/close_over_require.brie_close_over = {main: new _closure(1)}
 function main() {
-	return test/golden/js_compiler/close_over_require.brie_close_over.main.fill_in_arguments().call(fn_1_);
+	return test/golden/js_compiler/close_over_require.brie_close_over.main.partial(__unit, "Unit").call();
 }

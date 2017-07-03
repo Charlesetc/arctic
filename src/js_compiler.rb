@@ -109,7 +109,6 @@ class JsCompiler
                    ''
                  end
     ifstmt.compiled = "if (#{condition}) {#{inner_if}} else {#{inner_else}}"
-
   end
 
   def handle_define(item, toplevel:)
@@ -127,46 +126,31 @@ class JsCompiler
     else
       error_ast_type(first, expected: "a Function") unless first.type.class == FunctionType
       arguments = parens.children[1...parens.children.length]
+      arg_calls = arguments.map { |x| partial_call(x) }.join
+      parens.compiled = first.compiled + arg_calls
 
       # If greater
-      if first.type.arity > arguments.length
-        # fill in the arguments
-        inner = arguments.map { |x| x.compiled }.join(",")
-        parens.compiled = first.compiled + ".fill_in_arguments(#{inner})"
-      else
-        # if equal:
-        # now we have all the arguments,
-        # but it still could be a closure.
-
-        # if it's a unit type:
-        arguments = [] if first.type.arity < arguments.length
-
-        # need the arguments because it's based on their
-        # types. Could be improved a bit.
-        args = arguments.map { |x| x.compiled }.join(",")
-        news = ".fill_in_arguments(#{args})"
-        news += prepare_function_call(
-          first.type.add_arguments(arguments)
-        )
-        parens.compiled = first.compiled + news
+      if first.type.arity <= arguments.length
+        parens.compiled += ".call()"
       end
     end
   end
 
-  def prepare_function_call(function_type)
+  def triage_the_specific_call(function_type)
     @phonebook.lookup_function(
       function_type,
       method: :fetch
     ) do |ast, arguments|
       triage(ast)
-
-      ".call(#{specific_fp(function_type.name, arguments)})"
     end
   end
 
   def handle_block(block)
-    found = @phonebook.lookup_found(block.type).join(",")
-    block.compiled = "new_closure().fill_in_arguments(#{found})"
+    name = block.type.names[0]
+    raise "expected block ast to have single name" unless block.type.names.length == 1
+
+    args_to_new_closure = [name] + @phonebook.lookup_found(name)
+    block.compiled = "new _closure(#{args_to_new_closure.join(",")})"
   end
 
   def generate_function_definition(block, argtypes)
@@ -178,9 +162,12 @@ class JsCompiler
 
     inner = items.map { |x| "\t#{x.compiled};\n" }.join
 
-    args = @phonebook.lookup_found(block.type)
+    name = block.type.names[0]
+    raise "expected block ast to have single name" unless block.type.names.length == 1
+
+    args = @phonebook.lookup_found(name)
     args += block.arguments.map {|x| x.data}
-    "function #{specific_fp(block.type.name, argtypes)}(#{args.join(",")}) {\n#{inner}}"
+    "function #{specific_fp(name, argtypes)}(#{args.join(",")}) {\n#{inner}}"
   end
 
   def handle_object_literal(object)
@@ -193,7 +180,6 @@ class JsCompiler
   def handle_dot_access(dot)
     dot.compiled = dot.child.compiled + "." + dot.name
   end
-
 
   #
   # Helpers
