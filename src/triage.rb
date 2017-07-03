@@ -72,6 +72,10 @@ module Triage
           return triage_if(ast)
         when "while"
           return triage_while(ast)
+        when "inlay"
+          return handle_inlay(ast)
+        when "::"
+          return triage_type_check(ast)
         end
       end
 
@@ -128,6 +132,12 @@ module Triage
   def triage_dot_access(dot)
     triage(dot.child)
     handle_dot_access(dot)
+  end
+
+  def triage_type_check(check)
+    # assert there are enough children
+    triage(check.children[1])
+    handle_type_check(check)
   end
 
   def triage_object_literal(object)

@@ -19,7 +19,7 @@ the `:`, which can be dropped if there are none)
 [1,2,3].map : x [ x * x ]
 
 define hello_world [
-  "Screw you, world!"
+  "Love you, world!"
 ]
 ```
 

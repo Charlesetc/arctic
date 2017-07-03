@@ -1,3 +1,4 @@
+require_relative './types'
 
 class String
 
@@ -16,8 +17,9 @@ def error_ast(ast, reason)
   exit(0)
 end
 
-def error_ast_type(ast, expected:)
-  STDERR.puts "Error: Expected #{expected}, but got #{ast.type.inspect}", ast
+def error_ast_type(ast, expected:, type: nil)
+  type ||= ast.type
+  STDERR.puts "Error: Expected #{expected}, but got #{type.inspect}", ast
   exit(0)
 end
 
@@ -35,4 +37,25 @@ end
 
 def partial_call(x)
   ".partial(#{x.compiled}, \"#{x.type.inspect}\")"
+end
+
+def parse_annotation(annotation)
+  case annotation.data
+  when "string"
+    StringType
+  when "int"
+    IntegerType
+  when "function"
+    FunctionType
+  when "unit"
+    UnitType
+  when "bool"
+    BoolType
+  when "float"
+    FloatType
+  when "function"
+    FunctionType
+  else
+    error_ast(annotation, "not a proper type")
+  end
 end

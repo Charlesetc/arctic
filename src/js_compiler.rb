@@ -21,6 +21,10 @@ class JsCompiler
     req.compiled = ''
   end
 
+  def handle_type_check(check)
+    check.compiled = check.children[1].compiled
+  end
+
   def compile
     run_triage
 
@@ -38,7 +42,7 @@ class JsCompiler
     # extra logic to compile-time-dispatch on their types.)
     # one example is imported objects.
     @phonebook.toplevel_extras do |filename, name, ast|
-      triage(ast)
+      triage(ast) unless ast.compiled
       output << "var #{filename}_#{name} = #{ast.compiled}"
     end
 
@@ -197,6 +201,13 @@ class JsCompiler
 
   def handle_dot_access(dot)
     dot.compiled = dot.child.compiled + "." + dot.name
+  end
+
+  def handle_inlay(inlay)
+    unless inlay.children[1] and inlay.children[1].token == :string
+      error_ast(inlay, "inlay's first argument should be a string")
+    end
+    inlay.compiled = inlay.children[1].data
   end
 
   #

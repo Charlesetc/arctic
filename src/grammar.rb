@@ -22,8 +22,8 @@ class Tokenizer
     @text[@index+1]
   end
 
-  def advance
-    @index += 1
+  def advance(times = 1)
+    @index += times
   end
 
   def done?
@@ -67,12 +67,12 @@ class Tokenizer
       when char == ','
         advance
         save :comma
-      when char == ':'
-        advance
-        save :colon
       when char == ';'
         advance
         save :semicolon
+      when char == ':' && peek == ':'
+        advance 2
+        save :ident, data: "::"
       when char == '('
         advance
         save :open_round
@@ -165,6 +165,7 @@ class Grammar
     collect do |x|
       binary_operator(x, ["or"])
     end
+
     collect do |x|
       binary_operator(x, ["and"])
     end
@@ -179,6 +180,10 @@ class Grammar
 
     collect do |x|
       binary_operator(x, "*/")
+    end
+
+    collect do |x|
+      binary_operator(x, ["::"])
     end
 
     @ast
@@ -205,7 +210,7 @@ class Grammar
     ast.iterate do |child|
       case state
       when Searching
-        if child.token == :colon
+        if child.token == :ident and child.data == ":"
           state = Arguments
           nil
         elsif child.token == :open_square
