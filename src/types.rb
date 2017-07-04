@@ -117,7 +117,7 @@ class VariantType < Type
 
   def inspect_for_name
     inner = @names.map do |name, argtypes|
-      name + "_" + argtypes.map { |x| x.inspect}.join("_")
+      name + "_" + argtypes.map { |x| x.inspect_for_name }.join("_")
     end.join("__")
     "v_do__#{inner}__end"
   end

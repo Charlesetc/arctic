@@ -14,6 +14,11 @@ function _closure(name, arguments, types) {
   };
 
   this.call = function() {
+    // strange way to deal with units...
+    if (this.arguments[this.arguments.length-1] == null) {
+      this.arguments.pop();
+      this.types.pop();
+    }
     return global_functions
       [this.name]
       [this.types.join()]
@@ -25,3 +30,5 @@ function _closure(name, arguments, types) {
 function new_closure(name, ...closed) {
   return  new _closure(name, closed, []);
 }
+
+const __unit = null

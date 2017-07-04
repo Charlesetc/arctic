@@ -246,6 +246,14 @@ class JsCompiler
     true
   end
 
+  def define_label(item)
+    return unless item.class == Parens
+    return unless item.children[0]
+    return unless item.children[0].token == :ident
+    return unless item.children[0].data == "define"
+    item.compiled = item.compiled + " ; return #{item.children[1].data}"
+    true
+  end
 
   def if_label(item)
     return unless item.class == Parens
@@ -272,6 +280,7 @@ class JsCompiler
   def label_return(item)
     return if if_label(item)
     return if while_label(item)
+    return if define_label(item)
     item.compiled = 'return ' + item.compiled
   end
 

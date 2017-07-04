@@ -101,13 +101,14 @@ class Phonebook
       argument_types = arguments.map { |a| a.type }
       ast = phone_function.send(method, argument_types)
 
-      names = @names
-
-      @names = phone_function.stack
-      @current_phone_function = phone_function
-      rets << yield(ast, arguments)
-      @current_phone_function = nil
-      @names = names
+      unless ast.nil? # it's already been expanded
+        names = @names
+        @names = phone_function.stack
+        @current_phone_function = phone_function
+        rets << yield(ast, arguments)
+        @current_phone_function = nil
+        @names = names
+      end
     end
 
     rets

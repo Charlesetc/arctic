@@ -175,7 +175,7 @@ class Grammar
     end
 
     collect do |x|
-      binary_operator(x, "=")
+      binary_operator(x, "=", rename: "equals")
     end
 
     collect do |x|
@@ -471,7 +471,7 @@ class Grammar
   # plus or minus.
   # then do the same search on the group to the right
   # maybe then make this generic for /, *, and, or, etc.
-  def binary_operator(ast, operators)
+  def binary_operator(ast, operators, rename: nil)
 
     i = 0
     index = nil
@@ -498,6 +498,8 @@ class Grammar
 
       left = ast.children[0..index-1]
       right = ast.children[index+1..length]
+
+      ast.children[index].data = rename if rename
       ast.children = [
         ast.children[index],
         Parens.new(left, ast),
