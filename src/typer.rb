@@ -69,6 +69,33 @@ class Typer
     stmt.type = UnitType.new
   end
 
+  def handle_update(update)
+    # TODO: assert we've got everything
+    # here we need, in the right format
+    newvalue = update.children[2]
+    var = update.children[1]
+    if var.class == Parens
+      # TODO: more asserts:
+      var = var.children[0]
+    end
+
+    # we can deal with field assignments later, etc
+    raise("Was hoping this would be an ident") unless var.token == :ident
+
+    previous = @phonebook.lookup(@file.name, var.data)
+    error_ast(var, "Undefined reference: #{var.data}") if previous.nil?
+
+    # Type comparison!
+    # # must update with variant information if needed.
+    if previous.type != newvalue.type
+        error_ast_type(newvalue, expected: "#{previous.type.inspect}, because updates" +
+                       " must have the same type as the original")
+    end
+
+    # the type is whatever we were assigning
+    update.type = previous.type
+  end
+
   def handle_type_check(check)
     checked = check.children[1]
     annotation = check.children[2]
@@ -179,9 +206,7 @@ class Typer
         token.type = FloatType.new
       else
         number = @phonebook.lookup(@file.name, token.data)
-        if number.nil?
-          error_ast(token, "Undefined reference: #{token.data}")
-        end
+        error_ast(token, "Undefined reference: #{token.data}") if number.nil?
         token.type = number.type
       end
     when :string

@@ -167,6 +167,10 @@ class Grammar
     end
 
     collect do |x|
+      binary_operator(x, [":-"])
+    end
+
+    collect do |x|
       binary_operator(x, ["and"])
     end
 

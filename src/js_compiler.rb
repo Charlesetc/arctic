@@ -116,6 +116,15 @@ class JsCompiler
     stmt.compiled = "while (#{condition}) {#{inner}}"
   end
 
+  def handle_update(update)
+    var = update.children[1]
+    if var.class == Parens
+      # TODO: more asserts:
+      var = var.children[0]
+    end
+    update.compiled = "(#{var.data} = #{update.children[2].compiled})"
+  end
+
   def handle_if(ifstmt)
 
     condition = ifstmt.children[1].compiled

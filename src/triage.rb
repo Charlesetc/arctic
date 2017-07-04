@@ -76,6 +76,8 @@ module Triage
           return handle_inlay(ast)
         when "::"
           return triage_type_check(ast)
+        when ":-"
+          return triage_update(ast)
         end
       end
 
@@ -137,6 +139,11 @@ module Triage
     # assert there are enough children
     triage(check.children[1])
     handle_type_check(check)
+  end
+
+  def triage_update(update)
+    triage(update.children[2])
+    handle_update(update)
   end
 
   def triage_object_literal(object)
