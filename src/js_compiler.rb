@@ -36,18 +36,10 @@ class JsCompiler
       output << generate_function_definition(ast, argtypes)
     end
 
-    # this is supposed to be where we handle
-    # things that have been defined on the toplevel
-    # but aren't functions. (Function calls require
-    # extra logic to compile-time-dispatch on their types.)
-    # one example is imported objects.
-    @phonebook.toplevel_extras do |filename, name, ast|
-      triage(ast)
-      output << "var #{filename}_#{name} = #{ast.compiled}"
-    end
-
     output << generate_main_function
     output << call_main_function
+
+    toplevel_extras(output)
 
     output.join "\n"
   end
@@ -60,6 +52,20 @@ class JsCompiler
       "#{name}: {#{inner}}"
     end.join(",")
     "const global_functions = {#{inner}};"
+  end
+
+  def toplevel_extras(output)
+    @phonebook.toplevel_extras do |filename, name, ast|
+      unless ast.type.class == FunctionType
+        triage(ast)
+      end
+      # this is because there are some functions
+      # that are never looked at.
+      # we skip those
+      if (ast.compiled or ast.type.class != FunctionType)
+        output << "var #{filename}_#{name} = #{ast.compiled}"
+      end
+    end
   end
 
   def generate_main_function

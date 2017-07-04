@@ -3,3 +3,4 @@ function main() {
 	return {x: 2, y: "hi"};
 }
 console.log(main());
+var test/golden/js_compiler/object_literal.brie_main = new_closure(1)

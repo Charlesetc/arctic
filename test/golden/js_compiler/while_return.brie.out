@@ -3,3 +3,4 @@ function main() {
 	while (true) {3;} ; return __unit;
 }
 console.log(main());
+var test/golden/js_compiler/while_return.brie_main = new_closure(1)

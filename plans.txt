@@ -1,8 +1,6 @@
 
-# Features
+# Planned Features
 
-* module system
-* polymorphic variants
 * classes
 
 # Parsing
@@ -24,7 +22,7 @@
   - Do a grammar pass to get rid of them.
 * Compiler 'require' doesn't handle directories at all.
   - also fix tests that use this.
-* Add varient types when it's just a single
+* Add variant types when it's just a single
   thing in an argument, not a function call.
 
 # Roadmap

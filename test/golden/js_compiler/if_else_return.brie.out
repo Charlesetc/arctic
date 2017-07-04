@@ -4,3 +4,4 @@ function main() {
 	return false;
 }
 console.log(main());
+var test/golden/js_compiler/if_else_return.brie_main = new_closure(1)

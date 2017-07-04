@@ -31,7 +31,7 @@ def specific_fp(name, arguments)
   unless arguments[0].is_a?(Type)
     arguments = arguments.map { |x| x.type }
   end
-  tps = arguments.map { |x| x.inspect }.join("_")
+  tps = arguments.map { |x| x.inspect_for_name }.join("__")
   "fn_#{name}_#{tps}"
 end
 

@@ -1,8 +1,8 @@
-const global_functions = {1: {},2: {"Integer,Function,String": fn_2_Integer_Function_String,"Integer,String,Function": fn_2_Integer_String_Function},3: {}};
-function fn_2_Integer_Function_String(x,y,z) {
+const global_functions = {1: {},2: {"Integer,Function,String": fn_2_Integer__Function__String,"Integer,String,Function": fn_2_Integer__String__Function},3: {}};
+function fn_2_Integer__Function__String(x,y,z) {
 	return x;
 }
-function fn_2_Integer_String_Function(x,y,z) {
+function fn_2_Integer__String__Function(x,y,z) {
 	return x;
 }
 function main() {
@@ -13,3 +13,4 @@ function main() {
 	return f.partial("hi", "String").partial(y, "Function").call();
 }
 console.log(main());
+var test/golden/js_compiler/function_partial_apply.brie_main = new_closure(1)

@@ -18,14 +18,11 @@ class Type
   end
 
   def inspect
-    attrs = instance_variables
-      .map {|a| "#{a.to_s[1..a.to_s.length]}=#{instance_variable_get(a)}"}
-      .join(", ")
-    "#{self.class}(#{attrs})"
+    File.basename(self.class.to_s, "Type")
   end
 
-  def inspect
-    File.basename(self.class.to_s, "Type")
+  def inspect_for_name
+    inspect
   end
 
   def to_s
@@ -75,14 +72,21 @@ end
 
 class ObjectType < Type
   attr_accessor :fields
+
   def initialize(fields)
     @fields = fields
   end
+
   def inspect
     inner = @fields.map do |name, type|
       "#{name} = #{type.inspect}"
     end.join(", ")
     "<#{inner}>"
+  end
+
+  def inspect_for_name
+    inner = @fields.map {|k,v| [k, v.inspect_for_name]}.flatten.join("__")
+    "o_do__#{inner}__end"
   end
 end
 
@@ -110,6 +114,13 @@ class VariantType < Type
     end.join(", ")
     "[^ #{inner} ]"
   end
+
+  def inspect_for_name
+    inner = @names.map do |name, argtypes|
+      name + "_" + argtypes.map { |x| x.inspect}.join("_")
+    end.join("__")
+    "v_do__#{inner}__end"
+  end
 end
 
 # These two merging functions
@@ -124,7 +135,11 @@ def merge_variants(a, b, reason:, ast_for_error:)
   b.names.each do |name, types|
     if names[name]
       if names[name].length != types.length
-
+        error_ast_type(
+          ast_for_error,
+          expected: "#{a.inspect} with #{names[name].length} arguments not #{types.length} for variant #{name}",
+          type: b
+        )
       end
       names[name] = names[name].map.with_index do |atype, i|
         btype = types[i]
@@ -145,10 +160,8 @@ def merge_variants(a, b, reason:, ast_for_error:)
 end
 def merge_types(a, b, reason:, ast_for_error:)
   error = lambda {
-    require 'pry'; binding.pry
     error_ast_type(
-      ast_for_error,
-      expected: "#{a.inspect}, because #{reason}",
+      ast_for_error, expected: "#{a.inspect}, because #{reason}",
       type: b
     )
   }

@@ -1,0 +1,23 @@
+const global_functions = {1: {"<field = [^ Cool Integer ]>": fn_1_o_do__field__v_do__Cool_Integer__end__end,"<field = [^ Cool Integer, Hi  ]>": fn_1_o_do__field__v_do__Cool_Integer__Hi___end__end},2: {"<field = [^ Cool Integer ]>": fn_2_o_do__field__v_do__Cool_Integer__end__end},3: {}};
+function fn_1_o_do__field__v_do__Cool_Integer__end__end(x) {
+	var y = x;
+	return (y = {field: {Wow: []}});
+}
+function fn_1_o_do__field__v_do__Cool_Integer__Hi___end__end(x) {
+	var y = x;
+	return (y = {field: {Wow: []}});
+}
+function fn_2_o_do__field__v_do__Cool_Integer__end__end(x) {
+	var y = x;
+	(y = {field: {Hi: []}});
+	return test/golden/js_compiler/lots_of_variants.brie_a.partial(y, "<field = [^ Cool Integer, Hi  ]>").call();
+}
+function main() {
+	var f = {f: test/golden/js_compiler/lots_of_variants.brie_a};
+	if (true) {(f = {f: test/golden/js_compiler/lots_of_variants.brie_b});} else {};
+	return f.f.partial({field: {Cool: [2]}}, "<field = [^ Cool Integer ]>").call();
+}
+console.log(main());
+var test/golden/js_compiler/lots_of_variants.brie_a = new_closure(1)
+var test/golden/js_compiler/lots_of_variants.brie_b = new_closure(2)
+var test/golden/js_compiler/lots_of_variants.brie_main = new_closure(3)
