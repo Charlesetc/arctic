@@ -17,7 +17,7 @@ function main() {
 	if (true) {(f = {f: test/golden/js_compiler/lots_of_variants.brie_b});} else {};
 	return f.f.partial({field: {Cool: [2]}}, "<field = [^ Cool Integer ]>").call();
 }
-console.log(main());
 var test/golden/js_compiler/lots_of_variants.brie_a = new_closure(1)
 var test/golden/js_compiler/lots_of_variants.brie_b = new_closure(2)
 var test/golden/js_compiler/lots_of_variants.brie_main = new_closure(3)
+console.log(main());

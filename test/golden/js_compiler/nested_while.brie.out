@@ -3,5 +3,5 @@ function main() {
 	while (true) {while (true) {3;};
 4;} ; return __unit;
 }
-console.log(main());
 var test/golden/js_compiler/nested_while.brie_main = new_closure(1)
+console.log(main());

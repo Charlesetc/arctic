@@ -3,5 +3,5 @@ function main() {
 	var x = {y: 3};
 	return x.y;
 }
-console.log(main());
 var test/golden/js_compiler/object_dot_access.brie_main = new_closure(1)
+console.log(main());

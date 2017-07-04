@@ -10,6 +10,6 @@ function fn_3_(x) {
 function main() {
 	return test/golden/js_compiler/close_over_require.brie_close_over.main.partial(__unit, "Unit").call();
 }
-console.log(main());
 var test/golden/js_compiler/close_over_require.brie_close_over = {main: new_closure(1)}
 var test/golden/js_compiler/close_over_require.brie_main = new_closure(2)
+console.log(main());

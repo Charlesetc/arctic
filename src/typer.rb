@@ -70,33 +70,64 @@ class Typer
   end
 
   def handle_update(update)
+    # This could be redesigned with patterns nicely.
+    #
     # TODO: assert we've got everything
     # here we need, in the right format
+    #
     newvalue = update.children[2]
     var = update.children[1]
+
+    # potentially unbox
     if var.class == Parens
       # TODO: more asserts:
       var = var.children[0]
     end
 
-    # we can deal with field assignments later, etc
-    raise("Was hoping this would be an ident") unless var.token == :ident
+    if var.class == Dot_access
+      child = var.child
 
-    previous = @phonebook.lookup(@file.name, var.data)
-    error_ast(var, "Undefined reference: #{var.data}") if previous.nil?
+      # we can deal with field assignments later, etc
+      raise("Assignments to fields have to be on identifiers") unless child.token == :ident
 
-    # Type comparison!
-    # # must update with variant information if needed.
+      # sets the type for the return value.
+      var.type = merge_types(
+        var.type,
+        newvalue.type,
+        reason: "updates must have the same type as the original",
+        ast_for_error: newvalue,
+      )
 
-    previous.type = merge_types(
-      previous.type,
-      newvalue.type,
-      reason: "updates must have the same type as the original",
-      ast_for_error: newvalue,
-    )
+      previous = @phonebook.lookup(@file.name, child.data)
+      error_ast(var, "Undefined reference: #{var.data}") if previous.nil?
 
-    # the type is whatever we were assigning
-    update.type = previous.type
+      # it's gotta be an object.
+      # we already triaged the
+      # dotaccess so the types
+      # work out
+      previous.type.fields[var.name] = var.type
+      return
+    else
+
+      # we can deal with field assignments later, etc
+      raise("Assignments should be to identifier or fields") unless var.token == :ident
+
+      previous = @phonebook.lookup(@file.name, var.data)
+      error_ast(var, "Undefined reference: #{var.data}") if previous.nil?
+
+      # Type comparison!
+      # # must update with variant information if needed.
+
+      previous.type = merge_types(
+        previous.type,
+        newvalue.type,
+        reason: "updates must have the same type as the original",
+        ast_for_error: newvalue,
+      )
+
+      # the type is whatever we were assigning
+      update.type = previous.type
+    end
   end
 
   def handle_type_check(check)

@@ -2,5 +2,5 @@ const global_functions = {1: {}};
 function main() {
 	if (false) {return 1;} else {if (false) {return 2;} else {if (false) {return 3;} else {return 4;};};};
 }
-console.log(main());
 var test/golden/js_compiler/if_else_if_else.brie_main = new_closure(1)
+console.log(main());

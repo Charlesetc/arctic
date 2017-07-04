@@ -12,5 +12,5 @@ function main() {
 	f.partial(y, "Function").partial("hi", "String").call();
 	return f.partial("hi", "String").partial(y, "Function").call();
 }
-console.log(main());
 var test/golden/js_compiler/function_partial_apply.brie_main = new_closure(1)
+console.log(main());

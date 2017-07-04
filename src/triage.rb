@@ -142,6 +142,7 @@ module Triage
   end
 
   def triage_update(update)
+    triage(update.children[1])
     triage(update.children[2])
     handle_update(update)
   end

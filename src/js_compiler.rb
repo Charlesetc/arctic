@@ -37,9 +37,8 @@ class JsCompiler
     end
 
     output << generate_main_function
-    output << call_main_function
-
     toplevel_extras(output)
+    output << call_main_function
 
     output.join "\n"
   end
@@ -128,7 +127,7 @@ class JsCompiler
       # TODO: more asserts:
       var = var.children[0]
     end
-    update.compiled = "(#{var.data} = #{update.children[2].compiled})"
+    update.compiled = "(#{var.compiled} = #{update.children[2].compiled})"
   end
 
   def handle_if(ifstmt)
