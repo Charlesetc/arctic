@@ -1,0 +1,4 @@
+define main [
+	define x (Hi "there")
+	x :- You "turtle"
+]

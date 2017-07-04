@@ -1,0 +1,4 @@
+define main [
+        define x (Hi < x = (There "you")>)
+        x :- (Hi < x = (There "wow") >)
+]

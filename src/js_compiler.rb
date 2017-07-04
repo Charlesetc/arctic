@@ -225,7 +225,7 @@ class JsCompiler
       child.compiled
     end.join(",")
 
-    parens.compiled = "{\"#{name}\": [#{arguments}]}"
+    parens.compiled = "{#{name}: [#{arguments}]}"
   end
 
   #

@@ -1,5 +1,6 @@
 const global_functions = {1: {}};
 function main() {
-	return var x = {Hi: [2]};
+	var x = {Hi: ["there"]};
+	return (x = {You: ["turtle"]});
 }
 console.log(main());

@@ -1,4 +1,6 @@
 
+require_relative './utils'
+
 #
 # Types
 #
@@ -7,7 +9,7 @@ class Type
   def ==(another)
     return false unless another.class == self.class
     return false unless another.instance_variables == instance_variables
-    instance_variables.each do |i|
+    (instance_variables - self.class.dont_check).each do |i|
       if instance_variable_get(i) != another.instance_variable_get(i)
         return false
       end
@@ -28,6 +30,10 @@ class Type
 
   def to_s
     inspect
+  end
+
+  def self.dont_check
+    []
   end
 end
 
@@ -57,6 +63,14 @@ class FunctionType < Type
       arguments: @arguments + arguments
     )
   end
+
+  def add_names(names)
+    FunctionType.new(
+      @names + names,
+      @arity,
+      arguments: @arguments,
+    )
+  end
 end
 
 class ObjectType < Type
@@ -75,34 +89,88 @@ end
 class VariantType < Type
   attr_accessor :names, :locations
 
-  def initialize(name, argtypes, location)
-    @names = {name => argtypes}
-    @locations = {name => location}
+  def self.dont_check
+    [:@locations]
   end
 
-  def merge(other, reason:, ast_for_error:)
-    @names.each do |k, v|
-      if other.names[k] and other.names[k] != v
-        error_ast(ast_for_error,
-                  "merging variables: " +
-                  "found for name #{k} type #{v} " +
-                  "at #{@locations[k]}" +
-                  "but also found type #{other.names[k]} " +
-                  "at #{other.locations[k]}"
-                 )
-      end
-    end
-
-    newone = self.clone
-    newone.names = names.merge(other.names)
-    # not sure if this is needed:
-    newone.locations = locations.clone
-    newone
+  def self.start(name, argtypes, location)
+    names = {name => argtypes}
+    locations = {name => location}
+    self.new(names, locations)
   end
+
+  def initialize(names, locations)
+    @names = names
+    @locations = locations
+  end
+
   def inspect
     inner = @names.map do |name, argtypes|
       name + " " + argtypes.map { |x| x.inspect }.join(" ")
     end.join(", ")
     "[^ #{inner} ]"
+  end
+end
+
+# These two merging functions
+# recursively merge variants,
+# objects, and other types,
+# and throw an error if the
+# types are incompatible.
+
+def merge_variants(a, b, reason:, ast_for_error:)
+  names = a.names.clone
+
+  b.names.each do |name, types|
+    if names[name]
+      if names[name].length != types.length
+
+      end
+      names[name] = names[name].map.with_index do |atype, i|
+        btype = types[i]
+        merge_types(atype,
+                    btype,
+                    reason:reason,
+                    ast_for_error:ast_for_error)
+      end
+    else
+      names[name] = types
+    end
+  end
+
+  VariantType.new(
+    names,
+    a.locations.merge(b.locations)
+  )
+end
+def merge_types(a, b, reason:, ast_for_error:)
+  error = lambda {
+    require 'pry'; binding.pry
+    error_ast_type(
+      ast_for_error,
+      expected: "#{a.inspect}, because #{reason}",
+      type: b
+    )
+  }
+
+  error.call if a.class != b.class
+
+  if a.class == FunctionType
+    a.add_names(b.names)
+  elsif a.class == VariantType
+    merge_variants(a, b, reason: reason, ast_for_error: ast_for_error)
+  elsif a.class == ObjectType
+    error.call if a.fields.keys != b.fields.keys
+    ObjectType.new(
+      a.fields.map do |name, value|
+        [
+          name,
+           merge_types(value, b.fields[name],
+                       reason: reason, ast_for_error: ast_for_error)
+        ]
+      end.to_h
+    )
+  else
+    a
   end
 end

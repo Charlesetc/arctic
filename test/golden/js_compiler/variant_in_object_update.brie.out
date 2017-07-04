@@ -1,0 +1,6 @@
+const global_functions = {1: {}};
+function main() {
+	var x = {Hi: [{x: {There: ["you"]}}]};
+	return (x = {Hi: [{x: {There: ["wow"]}}]});
+}
+console.log(main());

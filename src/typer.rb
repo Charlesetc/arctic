@@ -87,10 +87,13 @@ class Typer
 
     # Type comparison!
     # # must update with variant information if needed.
-    if previous.type != newvalue.type
-        error_ast_type(newvalue, expected: "#{previous.type.inspect}, because updates" +
-                       " must have the same type as the original")
-    end
+
+    previous.type = merge_types(
+      previous.type,
+      newvalue.type,
+      reason: "updates must have the same type as the original",
+      ast_for_error: newvalue,
+    )
 
     # the type is whatever we were assigning
     update.type = previous.type
@@ -250,7 +253,7 @@ class Typer
     end
     location = [parens.start, parens.finish]
 
-    parens.type = VariantType.new(
+    parens.type = VariantType.start(
       name,
       argtypes,
       location
