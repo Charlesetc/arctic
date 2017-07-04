@@ -73,34 +73,34 @@ class ObjectType < Type
 end
 
 class VariantType < Type
-  attr_accessor :kinds, :kind_locations
+  attr_accessor :names, :locations
 
-  def initialize(kind, argtypes, location)
-    @kinds = {kind => argtypes}
-    @kind_locations = {kind => location}
+  def initialize(name, argtypes, location)
+    @names = {name => argtypes}
+    @locations = {name => location}
   end
 
   def merge(other, reason:, ast_for_error:)
-    @kinds.each do |k, v|
-      if other.kinds[k] and other.kinds[k] != v
+    @names.each do |k, v|
+      if other.names[k] and other.names[k] != v
         error_ast(ast_for_error,
                   "merging variables: " +
                   "found for name #{k} type #{v} " +
-                  "at #{@kind_locations[k]}" +
-                  "but also found type #{other.kinds[k]} " +
-                  "at #{other.kind_locations[k]}"
+                  "at #{@locations[k]}" +
+                  "but also found type #{other.names[k]} " +
+                  "at #{other.locations[k]}"
                  )
       end
     end
 
     newone = self.clone
-    newone.kinds = kinds.merge(other.kinds)
+    newone.names = names.merge(other.names)
     # not sure if this is needed:
-    newone.kind_locations = kind_locations.clone
+    newone.locations = locations.clone
     newone
   end
   def inspect
-    inner = @kinds.map do |name, argtypes|
+    inner = @names.map do |name, argtypes|
       name + " " + argtypes.map { |x| x.inspect }.join(" ")
     end.join(", ")
     "[^ #{inner} ]"

@@ -1,0 +1,3 @@
+define main [
+  define x (Hi 2)
+]

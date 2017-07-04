@@ -219,6 +219,17 @@ class Typer
   end
 
   def handle_variant(parens)
+    name = parens.children[0].data
+    argtypes = parens.children.drop(1).map do |child|
+      child.type
+    end
+    location = [parens.start, parens.finish]
+
+    parens.type = VariantType.new(
+      name,
+      argtypes,
+      location
+    )
   end
 
   def handle_block(block)

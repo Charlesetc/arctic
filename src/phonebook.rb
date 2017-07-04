@@ -132,7 +132,9 @@ class Phonebook
   def toplevel_extras
     @toplevel.each do |file, defs|
       defs.each do |name, ast|
-        yield file, name, ast
+        if ast.type.class != FunctionType
+          yield file, name, ast
+        end
       end
     end
   end

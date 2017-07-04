@@ -42,7 +42,7 @@ class JsCompiler
     # extra logic to compile-time-dispatch on their types.)
     # one example is imported objects.
     @phonebook.toplevel_extras do |filename, name, ast|
-      triage(ast) unless ast.compiled
+      triage(ast)
       output << "var #{filename}_#{name} = #{ast.compiled}"
     end
 
@@ -208,6 +208,15 @@ class JsCompiler
       error_ast(inlay, "inlay's first argument should be a string")
     end
     inlay.compiled = inlay.children[1].data
+  end
+
+  def handle_variant(parens)
+    name = parens.children[0].data
+    arguments = parens.children.drop(1).map do |child|
+      child.compiled
+    end.join(",")
+
+    parens.compiled = "{\"#{name}\": [#{arguments}]}"
   end
 
   #

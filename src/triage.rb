@@ -85,10 +85,9 @@ module Triage
          keyword.data[0] < 'Z' and
          keyword.data[0] > 'A'
         # triage the arguments
-        ast.children.drop(0).reverse.each { |c| triage(c) }
+        ast.children.drop(1).reverse.each { |c| triage(c) }
         return handle_variant(ast)
       end
-
 
       triage_function_call(ast)
     when ast.class == Object_literal
