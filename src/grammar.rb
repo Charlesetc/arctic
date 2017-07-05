@@ -2,7 +2,17 @@
 require_relative './ast'
 require_relative './utils'
 
-BREAK = ".{}(,)[]<=> \t\n:;".chars
+BREAK = " {}(,)[]\t\n:;".chars
+
+OPCHARS = '~!@#$%^&*-+=|\/<>.'
+
+ILLEGAL_OPERATIONS = [
+  # Since we're using < _ = _ > syntax for
+  # objects, it can become a little
+  # sketchy sometimes.
+  "=<", # <x=<y=3>>
+  ">>", # <x=<y=3>>
+]
 
 class Tokenizer
 
@@ -38,13 +48,23 @@ class Tokenizer
   def tokens
     until done?
       case
-      when char == '.'
+      when (char == '-' and peek == '-')
+        until done? or char == "\n"
+          advance
+        end
         advance
-        if BREAK.include? char
-          save :dot
-        else
+        save :newline
+      when OPCHARS.include?(char)
+        op = read_op
+        if op == '.' and not BREAK.include?(char)
           ident = read_ident
           save :dotaccess, data: ident
+        elsif ILLEGAL_OPERATIONS.include?(op)
+          op.chars.each do |c|
+            save :ident, data: c
+          end
+        else
+          save :ident, data: op
         end
       when char == '['
         advance
@@ -52,18 +72,6 @@ class Tokenizer
       when char == ']'
         advance
         save :close_square
-      when char == '<'
-        advance
-        save :open_angle
-      when char == '>'
-        advance
-        save :close_angle
-      when char == '=' && peek == '='
-        advance 2
-        save :ident, data: '=='
-      when char == '='
-        advance
-        save :ident, data: '='
       when char == "\n"
         advance
         save :newline
@@ -73,9 +81,12 @@ class Tokenizer
       when char == ';'
         advance
         save :semicolon
-      when char == ':' && peek == ':'
-        advance 2
-        save :ident, data: "::"
+      when char == '{'
+        advance
+        save :open_curly
+      when char == '}'
+        advance
+        save :close_curly
       when char == '('
         advance
         save :open_round
@@ -85,15 +96,12 @@ class Tokenizer
       when char == '"'
         string = read_quotes(char)
         save :string, data: string
+      when char == "'"
+        string = read_quotes(char)
+        save :string, data: string
       when (char == ' ' or char == "\t")
         advance
         @last = @index
-      when (char == '-' and peek == '-')
-        until done? or char == "\n"
-          advance
-        end
-        advance
-        save :newline
       else
         ident = read_ident
         save :ident, data: ident
@@ -106,9 +114,11 @@ class Tokenizer
   def read_ident
     store = char
     advance
-    until done? or BREAK.include?(char)
-      store += char
-      advance
+    until done? or
+      BREAK.include?(char) or
+      OPCHARS.include?(char)
+        store += char
+        advance
     end
     store
   end
@@ -121,6 +131,16 @@ class Tokenizer
       advance
     end
     advance
+    store
+  end
+
+  def read_op
+    store = char
+    advance
+    until done? or not OPCHARS.include?(char)
+      store += char
+      advance
+    end
     store
   end
 end
@@ -338,7 +358,7 @@ class Grammar
     ast.iterate do |child|
       case state
       when Searching
-        if child.token == :open_angle
+        if child.token == :ident and child.data == "<"
           count = 1
           state = Fields
           nil
@@ -364,9 +384,9 @@ class Grammar
         state = Lines
         nil
       when Lines
-        if child.token == :open_angle
+        if child.token == :ident and child.data == "<"
           count += 1
-        elsif child.token == :close_angle
+        elsif child.token == :ident and child.data == ">"
           raise 'Got unexpected close angle bracket' if count.zero?
           count -= 1
         end
