@@ -174,6 +174,10 @@ class Grammar
       dot_access x
     end
 
+    collect do |x|
+      let_syntax x
+    end
+
     # around here is where I would
     # pass off control to macros.
 
@@ -428,6 +432,29 @@ class Grammar
     ast.iterate_follow do
       ast.children << last_child
     end
+  end
+
+  def let_syntax(ast)
+    return unless ast.class == Parens
+    first = ast.children[0]
+    return unless first
+    return unless first.token == :ident
+    return unless first.data == "let"
+
+    raise "let _ = _ needs at least 3 arguments" if ast.children.length < 4
+
+    ident = ast.children[1]
+    raise "1st argument must be ident" unless ident.token == :ident
+    eq = ast.children[2]
+    raise "2nd argument must be =" unless eq.token == :ident
+    raise "2nd argument must be =" unless eq.data == "="
+
+    first.data = "define"
+    ast.children = [
+      ast.children[0],
+      ident,
+      Parens.new(ast.children[3..-1], nil)
+    ]
   end
 
   def while_cleanup(ast)

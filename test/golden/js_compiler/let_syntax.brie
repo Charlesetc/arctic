@@ -1,0 +1,9 @@
+define identity : x [
+  x
+]
+
+define main [
+  let x = 2
+  let x = identity x
+  x
+]

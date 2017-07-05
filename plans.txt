@@ -5,7 +5,6 @@
 
 # Parsing
 
-* add `let =` syntax
 * support semicolons in blocks.
 * parse floats correctly
 * 'define' can take infinitely many args -- problem
@@ -20,6 +19,9 @@
   - Do a grammar pass to get rid of them.
 * Compiler 'require' doesn't handle directories at all.
   - also fix tests that use this.
+* Found algorithm makes a mistake
+  when passing in variables of the
+  same name that were closed over.
 
 # Roadmap
 
