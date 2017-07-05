@@ -1,0 +1,5 @@
+define main [
+        let x = <this = [2]>
+        x = <this = ["hi"]>
+        x.this()
+]

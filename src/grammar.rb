@@ -102,6 +102,9 @@ class Tokenizer
       when (char == ' ' or char == "\t")
         advance
         @last = @index
+      when char.valid_integer?
+        number = read_number
+        save :ident, data: number
       else
         ident = read_ident
         save :ident, data: ident
@@ -109,6 +112,16 @@ class Tokenizer
     end
 
     @tokens
+  end
+
+  def read_number
+    store = char
+    advance
+    until done? or not (store + char).valid_float?
+      store += char
+      advance
+    end
+    store
   end
 
   def read_ident
@@ -289,6 +302,7 @@ class Grammar
         end
       end
     end
+
     raise 'Got unexpected open square bracket' if count != 0
   end
 

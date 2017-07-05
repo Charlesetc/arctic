@@ -7,7 +7,10 @@ class String
   end
 
   def valid_float?
-    true if Float self rescue false
+    # this index thing because $ only checks that
+    # it's the end of a line, not if it's the end
+    # of a string
+    self =~ /(^\d+([.])?(\d+)?$)/ and not self.index("\n")
   end
 
 end

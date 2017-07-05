@@ -2,12 +2,15 @@
 # Planned Features
 
 * classes
+* stacktraces in type errors
+* exceptions -- maybe not yet?
 
 # Parsing
 
 * support semicolons in blocks.
 * parse floats correctly
 * 'define' can take infinitely many args -- problem
+* match statment
 
 # Bugs
 

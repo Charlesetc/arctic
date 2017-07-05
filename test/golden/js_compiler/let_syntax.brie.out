@@ -1,0 +1,12 @@
+const global_functions = {1: {"Integer": fn_1_Integer},2: {}};
+function fn_1_Integer(x) {
+	return x;
+}
+function main() {
+	var x = 2;
+	var x = test/golden/js_compiler/let_syntax.brie_identity.partial(x, "Integer").call();
+	return x;
+}
+var test/golden/js_compiler/let_syntax.brie_identity = new_closure(1)
+var test/golden/js_compiler/let_syntax.brie_main = new_closure(2)
+console.log(main());

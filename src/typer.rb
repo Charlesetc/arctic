@@ -55,8 +55,15 @@ class Typer
 
         ast.children.last ? ast.children.last.type : UnitType.new
       end
-    # TODO: assert these are all equal and return it
-    returned_values[0]
+
+    # assert these are all equal/mergeable and return it
+    ret = returned_values.pop
+    returned_values.each do |val|
+      ret = merge_types(ret, val, reason: "function returns of " +
+                        "variants have to be the same",
+                        ast_for_error: function_type)
+    end
+    ret
   end
 
   def handle_while(stmt)
