@@ -224,6 +224,10 @@ class JsCompiler
     inlay.compiled = inlay.children[1].data
   end
 
+  def handle_single_variant(ident)
+    ident.compiled = "{#{ident.data}: null}"
+  end
+
   def handle_variant(parens)
     name = parens.children[0].data
     arguments = parens.children.drop(1).map do |child|

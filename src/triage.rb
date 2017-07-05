@@ -67,6 +67,8 @@ module Triage
         return handle_true(ast)
       elsif ast.token == :ident and ast.data == "false"
         return handle_false(ast)
+      elsif ast.token == :ident and iscapital(ast.data[0])
+        handle_single_variant(ast)
       else
         handle_token(ast)
       end
@@ -90,11 +92,7 @@ module Triage
         end
       end
 
-      if keyword and
-         keyword.token == :ident and
-         keyword.data[0] and
-         keyword.data[0] < 'Z' and
-         keyword.data[0] > 'A'
+      if keyword and keyword.token == :ident and iscapital(keyword.data)
         # triage the arguments
         ast.children.drop(1).reverse.each { |c| triage(c) }
         return handle_variant(ast)

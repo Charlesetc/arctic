@@ -59,3 +59,7 @@ def parse_annotation(annotation)
     error_ast(annotation, "not a proper type")
   end
 end
+
+def iscapital(c)
+  c and c < 'Z' and c > 'A'
+end

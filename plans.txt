@@ -9,8 +9,6 @@
 * support semicolons in blocks.
 * parse floats correctly
 * 'define' can take infinitely many args -- problem
-* make a distinction in the tokenizer between operators and
-  functions -- still just keep them as idents.
 
 # Bugs
 
@@ -22,8 +20,6 @@
   - Do a grammar pass to get rid of them.
 * Compiler 'require' doesn't handle directories at all.
   - also fix tests that use this.
-* Add variant types when it's just a single
-  thing in an argument, not a function call.
 
 # Roadmap
 

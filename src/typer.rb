@@ -279,6 +279,16 @@ class Typer
     end
   end
 
+  def handle_single_variant(ident)
+    name = ident.data
+    location = [ident.start, ident.finish]
+    ident.type = VariantType.start(
+      name,
+      [],
+      location
+    )
+  end
+
   def handle_variant(parens)
     name = parens.children[0].data
     argtypes = parens.children.drop(1).map do |child|
