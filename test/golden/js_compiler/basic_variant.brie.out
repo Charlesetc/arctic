@@ -1,6 +1,6 @@
 const global_functions = {1: {}};
 function main() {
-	return var x = {Hi: [2]};
+	var x = {Hi: [2]} ; return x;
 }
 var test/golden/js_compiler/basic_variant.brie_main = new_closure(1)
 console.log(main());

@@ -1,0 +1,10 @@
+define test : y [
+        < x = (Hi 2) >
+]
+define main [
+        define y (test 2)
+        y.x :- Wow "hi"
+        define x (test "Hi")
+        x.x :- Wow 3
+        y :- x
+]

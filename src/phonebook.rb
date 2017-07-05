@@ -16,13 +16,15 @@ class PhoneFunction
   end
 
   def expand(argument_types)
-    unless @expanded[argument_types]
+    first_time = @expanded[argument_types].nil?
+    if first_time
       @expanded[argument_types] = deepcopy(@ast)
     end
+    [first_time, @expanded[argument_types]]
   end
 
   def fetch(argument_types)
-    @expanded[argument_types]
+    [false, @expanded[argument_types]]
   end
 
   def found(item)
@@ -99,16 +101,14 @@ class Phonebook
       raise "every block should have been defined." if phone_function.nil?
       arguments = function_type.arguments
       argument_types = arguments.map { |a| a.type }
-      ast = phone_function.send(method, argument_types)
+      first_time, ast = phone_function.send(method, argument_types)
 
-      unless ast.nil? # it's already been expanded
-        names = @names
-        @names = phone_function.stack
-        @current_phone_function = phone_function
-        rets << yield(ast, arguments)
-        @current_phone_function = nil
-        @names = names
-      end
+      names = @names
+      @names = phone_function.stack
+      @current_phone_function = phone_function
+      rets << yield(ast, arguments, first_time)
+      @current_phone_function = nil
+      @names = names
     end
 
     rets

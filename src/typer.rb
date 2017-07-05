@@ -45,11 +45,13 @@ class Typer
 
   def execute_function(function_type)
     returned_values =
-      @phonebook.lookup_function(function_type) do |ast, arguments|
-        ast.arguments.each_with_index do |name, i|
-          @phonebook.insert(name.data, arguments[i])
+      @phonebook.lookup_function(function_type) do |ast, arguments, first_time|
+        if first_time
+          ast.arguments.each_with_index do |name, i|
+            @phonebook.insert(name.data, arguments[i])
+          end
+          ast.children.each { |x| triage(x) }
         end
-        ast.children.each { |x| triage(x) }
 
         ast.children.last ? ast.children.last.type : UnitType.new
       end

@@ -176,7 +176,7 @@ class JsCompiler
     @phonebook.lookup_function(
       function_type,
       method: :fetch
-    ) do |ast, arguments|
+    ) do |ast, arguments, _|
       triage(ast)
     end
   end
