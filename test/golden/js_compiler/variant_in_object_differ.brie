@@ -1,4 +1,4 @@
 define main [
         define x (Hi < x = (There "you")>)
-        x :- (Hi <x = (COol 2)>)
+        x = (Hi <x = (COol 2)>)
 ]

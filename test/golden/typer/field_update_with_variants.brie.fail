@@ -3,8 +3,8 @@ define test : y [
 ]
 define main [
         define y (test 2)
-        y.x :- Wow "hi"
+        y.x = Wow "hi"
         define x (test "Hi")
-        x.x :- Wow 3
-        y :- x
+        x.x = Wow 3
+        y = x
 ]

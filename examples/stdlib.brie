@@ -21,16 +21,16 @@ class list [
   field length = 0
 
   method push : newitem [
-    length +: 1
-    item :- list_element.new newitem
+    length += 1
+    item = list_element.new newitem
 
     if length is 0 [
-      first :- item
-      last :- item
+      first = item
+      last = item
     ] else [
-      (unwrap last).next :- item
-      item.previous :- unwrap last
-      last :- item
+      (unwrap last).next = item
+      item.previous = unwrap last
+      last = item
     ]
 
     -- return the list itself
@@ -38,15 +38,15 @@ class list [
   ]
 
   method unshift : newitem [
-    length :- 1
+    length = 1
     item = list_element.new newitem
     if length is 0 [
-      first :- item
-      last :- item
+      first = item
+      last = item
     ] else [
-      (unwrap first).previous :- item
-      item.next :- unwrap first
-      first :- item
+      (unwrap first).previous = item
+      item.next = unwrap first
+      first = item
     ]
 
     -- return the list
@@ -54,10 +54,10 @@ class list [
   ]
 
   method pop [
-    length -: 1
+    length -= 1
     case last [
       Some x [
-        last :- x.previous
+        last = x.previous
         x.value
       ]
       None [
@@ -67,10 +67,10 @@ class list [
   ]
 
   method shift [
-    length -: 1
+    length -= 1
     case first [
       Some x [
-        first :- x.previous
+        first = x.previous
         x.value
       ]
       None [

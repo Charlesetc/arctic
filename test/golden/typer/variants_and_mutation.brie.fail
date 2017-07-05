@@ -2,9 +2,9 @@ define main [
         define x < field = (One 2) >
         while true [
                 if true [
-                        x.field :- Two "hi"                                             
+                        x.field = Two "hi"                                             
                 ] else [
-                        x.field :- Two 2
+                        x.field = Two 2
                 ]
         ]
 ]

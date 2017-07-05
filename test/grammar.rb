@@ -85,12 +85,13 @@ compare "<x = (f a)>", "<x = ((:ident(f) :ident(a)))>"
 
 # While
 #
-+-> { compare "while x = z [ z ]", ":ident(while) (:ident(=) (:ident(x)) (:ident(z))) block[][(:ident(z))]" }
++-> { compare "while x == z [ z ]", ":ident(while) (:ident(is) (:ident(x)) (:ident(z))) block[][(:ident(z))]" }
++-> { compare "while x is z [ z ]", ":ident(while) (:ident(is) (:ident(x)) (:ident(z))) block[][(:ident(z))]" }
 
 # Update syntax
 
-+-> { compare "x :- 3", ":ident(:-) (:ident(x)) (:ident(3))"}
-+-> { compare "x :- 3 + 2", ":ident(:-) (:ident(x)) (:ident(+) (:ident(3)) (:ident(2)))"}
++-> { compare "x = 3", ":ident(_update) (:ident(x)) (:ident(3))"}
++-> { compare "x = 3 + 2", ":ident(_update) (:ident(x)) (:ident(+) (:ident(3)) (:ident(2)))"}
 
 
 # Line numbers

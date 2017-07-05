@@ -13,13 +13,13 @@ class String
 end
 
 def error_ast(ast, reason)
-  STDERR.puts "Error: #{reason}", ast
+  STDERR.puts "Error #{ast.start}:#{ast.finish}: #{reason}", ast.inspect
   exit(0)
 end
 
 def error_ast_type(ast, expected:, type: nil)
   type ||= ast.type
-  STDERR.puts "Error: Expected #{expected}, but got #{type.inspect}", ast
+  STDERR.puts "Error: Expected #{expected}, but got #{type.inspect}", ast.inspect
   exit(0)
 end
 

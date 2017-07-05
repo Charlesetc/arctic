@@ -1,17 +1,16 @@
 define a : x [
-        define y x
-        y :- <field = (Wow)>
+  define y x
+  y = <field = (Wow)>
 ]
 define b : x [
-        define y x
-        y :- <field = (Hi)>
-        a y
+  define y x
+  y = <field = (Hi)>
+  a y
 ]
 define main [
-        define f <f = a>
-        if true [
-                f :- <f = b>
-        ]
-        f.f <field = (Cool 2)>
+  define f <f = a>
+  if true [
+    f = <f = b>
+  ]
+  f.f <field = (Cool 2)>
 ]
-

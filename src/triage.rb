@@ -28,6 +28,15 @@ module Triage
   end
 
   def triage_define(item, toplevel: false)
+
+    # With this if-check, we can add
+    # definitions of operators by
+    # define (+) [ ]
+    # which is pretty sweet
+    if item.children[1].class == Parens
+      # TODO: assertions
+      item.children[1] = item.children[1].children[0]
+    end
     triage(item.children[2])
     handle_define(item, toplevel: toplevel)
   end
@@ -76,7 +85,7 @@ module Triage
           return handle_inlay(ast)
         when "::"
           return triage_type_check(ast)
-        when ":-"
+        when "_update"
           return triage_update(ast)
         end
       end

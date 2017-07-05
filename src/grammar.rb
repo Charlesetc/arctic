@@ -58,6 +58,9 @@ class Tokenizer
       when char == '>'
         advance
         save :close_angle
+      when char == '=' && peek == '='
+        advance 2
+        save :ident, data: '=='
       when char == '='
         advance
         save :ident, data: '='
@@ -167,7 +170,7 @@ class Grammar
     end
 
     collect do |x|
-      binary_operator(x, [":-"])
+      binary_operator(x, "=", rename: "_update")
     end
 
     collect do |x|
@@ -175,7 +178,7 @@ class Grammar
     end
 
     collect do |x|
-      binary_operator(x, "=", rename: "equals")
+      binary_operator(x, ["is", "=="], rename: "is")
     end
 
     collect do |x|
