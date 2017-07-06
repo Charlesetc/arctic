@@ -1,0 +1,33 @@
+const global_functions = {1: {}};
+function main() {
+	var x = {Zero: []};
+	(x = {One: [1]});
+	(x = {Two: [1,2]});
+	(x = {Three: [1,2,3]});
+	return (function(_matched_target){
+	if (_matched_got =  _matched_target.Zero) {
+	return 0;
+
+	}
+	if (_matched_got =  _matched_target.One) {
+	var x = _matched_got[0];
+	return x;
+
+	}
+	if (_matched_got =  _matched_target.Two) {
+	var a = _matched_got[0];
+	var b = _matched_got[1];
+	return b;
+
+	}
+	if (_matched_got =  _matched_target.Three) {
+	var a = _matched_got[0];
+	var b = _matched_got[1];
+	var c = _matched_got[2];
+	return c;
+
+	}
+}(x));
+}
+var test/golden/js_compiler/match_against_types.brie_main = new_closure(1)
+console.log(main());

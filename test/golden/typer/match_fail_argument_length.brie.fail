@@ -1,0 +1,7 @@
+define main [
+        let x = Some 2
+        match x [
+                None -> None
+                Some a b -> Some a b 
+        ]
+]

@@ -122,11 +122,8 @@ class JsCompiler
   end
 
   def handle_update(update)
+    unwrap_child?(update, 1)
     var = update.children[1]
-    if var.class == Parens
-      # TODO: more asserts:
-      var = var.children[0]
-    end
     update.compiled = "(#{var.compiled} = #{update.children[2].compiled})"
   end
 
@@ -225,7 +222,7 @@ class JsCompiler
   end
 
   def handle_single_variant(ident)
-    ident.compiled = "{#{ident.data}: null}"
+    ident.compiled = "{#{ident.data}: []}"
   end
 
   def handle_variant(parens)
@@ -235,6 +232,26 @@ class JsCompiler
     end.join(",")
 
     parens.compiled = "{#{name}: [#{arguments}]}"
+  end
+
+  def handle_match(ast, expression, sections)
+
+    # those that weren't typed are never hit
+    sections = sections.select { |s| s.expressions[0].type }
+
+    inner = sections.map do |section|
+
+      arguments = section.arguments.each_with_index.map do |arg, i|
+        "\tvar #{arg.data} = _matched_got[#{i}];\n"
+      end.join
+      statements = section.expressions.each { |expression| triage(expression) }
+      label_return(statements.last)
+      statements = statements.map {|s| "\t" + s.compiled + ";\n" }.join
+
+      "\tif (_matched_got =  _matched_target.#{section.name}) {\n#{arguments}#{statements}\n\t}\n"
+    end.join
+
+    ast.compiled = "(function(_matched_target){\n#{inner}}(#{expression.compiled}))"
   end
 
   #

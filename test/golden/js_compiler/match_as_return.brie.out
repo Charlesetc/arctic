@@ -1,0 +1,11 @@
+const global_functions = {1: {}};
+function main() {
+	return (function(_matched_target){
+	if (_matched_got =  _matched_target.X) {
+	return 2;
+
+	}
+}({X: []}));
+}
+var test/golden/js_compiler/match_as_return.brie_main = new_closure(1)
+console.log(main());

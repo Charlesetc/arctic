@@ -1,0 +1,28 @@
+define print_string : x [
+  x :: string
+  inlay 'console.log(x)'
+]
+define print_integer : x [
+  x :: int
+  inlay 'console.log(x)'
+]
+
+define race : x [
+  match x [
+    Start a ->  ()
+                print_string "whaaaaaaaat"
+                print_integer a.tail
+    Finish x -> print_string x
+  ]
+]
+
+
+define main [
+  let a = Start <x = 2, tail = 3>
+  let b = Start <y = 2, tail = 5>
+  let c = Finish "hi"
+
+  race a
+  race b
+  race c
+]

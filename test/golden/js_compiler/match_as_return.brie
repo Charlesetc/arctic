@@ -1,0 +1,3 @@
+define main [
+  match X [ X -> 2 ]
+]

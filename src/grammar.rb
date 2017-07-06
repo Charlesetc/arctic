@@ -195,6 +195,38 @@ class Grammar
     # pass off control to macros.
 
     collect do |x|
+      binary_operator(x, ["or"])                         #   ^
+    end                                                  #   |  Binds looser
+                                                         #   |
+    collect do |x|                                       #   |
+      binary_operator(x, "=", rename: "_update")         #   |
+    end                                                  #   |
+                                                         #   |
+    collect do |x|                                       #   |
+      binary_operator(x, ["and"])                        #   |
+    end                                                  #   |
+                                                         #   | Binds tighter
+    collect do |x|                                       #   |
+      binary_operator(x, ["is", "=="], rename: "is")     #   V
+    end
+
+    collect do |x|
+      binary_operator(x, "+-", rename: ["_plus", "_minus"])
+    end
+
+    collect do |x|
+      binary_operator(x, "*/", rename: ["_times", "_divide"])
+    end
+
+    collect do |x|
+      binary_operator(x, ["::"])
+    end
+
+    collect do |x|
+      binary_operator(x, ["->"])
+    end
+
+    collect do |x|
       if_cleanup x
     end
 
@@ -202,33 +234,6 @@ class Grammar
       while_cleanup x
     end
 
-    collect do |x|
-      binary_operator(x, ["or"])
-    end
-
-    collect do |x|
-      binary_operator(x, "=", rename: "_update")
-    end
-
-    collect do |x|
-      binary_operator(x, ["and"])
-    end
-
-    collect do |x|
-      binary_operator(x, ["is", "=="], rename: "is")
-    end
-
-    collect do |x|
-      binary_operator(x, "+-")
-    end
-
-    collect do |x|
-      binary_operator(x, "*/")
-    end
-
-    collect do |x|
-      binary_operator(x, ["::"])
-    end
 
     @ast
   end
@@ -259,6 +264,7 @@ class Grammar
           nil
         elsif child.token == :open_square
           count = 1
+
           state = Lines
           nil
         else
@@ -563,7 +569,13 @@ class Grammar
       left = ast.children[0..index-1]
       right = ast.children[index+1..length]
 
-      ast.children[index].data = rename if rename
+      if rename.class == Array
+        op = ast.children[index].data
+        ast.children[index].data = rename[operators.index(op)]
+      else
+        ast.children[index].data = rename if rename
+      end
+
       ast.children = [
         ast.children[index],
         Parens.new(left, ast),

@@ -67,7 +67,7 @@ module Triage
         return handle_true(ast)
       elsif ast.token == :ident and ast.data == "false"
         return handle_false(ast)
-      elsif ast.token == :ident and iscapital(ast.data[0])
+      elsif ast.token == :ident and iscapital(ast.data)
         handle_single_variant(ast)
       else
         handle_token(ast)
@@ -89,6 +89,8 @@ module Triage
           return triage_type_check(ast)
         when "_update"
           return triage_update(ast)
+        when "match"
+          return triage_match(ast)
         end
       end
 
@@ -159,4 +161,97 @@ module Triage
     handle_object_literal(object)
   end
 
+  def triage_match(ast)
+    error_ast(ast, "match should have 2 children") if ast.children.length != 3
+    matched = ast.children[1]
+    triage(matched)
+
+    block = ast.children[2]
+
+    error_ast(ast, "match second child should be a block") unless block.class == Block
+    error_ast(ast, "don't match with no branches please") unless block.children.length > 0
+    error_ast(ast, "first line of match must be an arrow line") unless is_arrow(block.children[0])
+
+    section = nil
+    msection = nil
+    msections = []
+
+    block.children.each do |child|
+      raise("block children are always parens") if child.class != Parens
+
+      if is_arrow(child)
+        msections << msection if section
+        _, pattern, expression = child.children
+
+        if pattern.class == Parens
+          firstpattern = pattern.children[0]
+          error_ast(pattern, "match pattern should be a variant") if firstpattern.nil?
+          error_ast(pattern, "match pattern should be a variant") if firstpattern.token != :ident
+          error_ast(pattern, "match pattern should be a variant") unless iscapital(firstpattern.data)
+        elsif pattern.token == :ident
+          error_ast(pattern, "match pattern should be a variant") unless iscapital(pattern.data)
+          pattern = Parens.new([pattern], nil)
+        else
+          error_ast(pattern, "match pattern should be a variant") if pattern.class != Parens
+        end
+
+        section = [expression]
+
+        msection = MatchSection.new(pattern, section)
+      else
+        section << child
+      end
+    end
+
+    msections << msection if msection
+
+
+    msections.each do |section|
+      name = section.pattern.children[0].data
+      arguments = section.pattern.children.drop(1)
+      section.name = name
+      section.arguments = arguments
+    end
+
+    handle_match(
+      ast,
+      matched,
+      msections,
+    )
+  end
+
+end
+
+MatchSection = Struct.new(
+  :pattern,
+  :expressions,
+  :name,
+  :arguments,
+  :expected_types,
+  :return_type
+)
+
+def is_arrow(p)
+  return false unless p.class == Parens
+  first = p.children[0]
+  return false unless first
+  return false unless first.token == :ident
+  return false unless first.data == "->"
+
+  unless p.children.length == 3
+    error_ast(p, "arrow should have two arguments")
+  end
+  unwrap_child?(p, 1)
+  return true
+end
+
+def unwrap_child?(p, i)
+  if p.class != Parens
+    raise "can only unwrap parens' children"
+  end
+  c = p.children[i]
+
+  if c.class == Parens and c.children.length == 1
+    p.children[i] = c.children[0]
+  end
 end

@@ -1,0 +1,65 @@
+const global_functions = {1: {"String": fn_1_String,"String": fn_1_String,"String": fn_1_String},2: {"Integer": fn_2_Integer,"Integer": fn_2_Integer},3: {"[^ Start <x = Integer, tail = Integer> ]": fn_3_v_do__Start_o_do__x__Integer__tail__Integer__end__end,"[^ Start <y = Integer, tail = Integer> ]": fn_3_v_do__Start_o_do__y__Integer__tail__Integer__end__end,"[^ Finish String ]": fn_3_v_do__Finish_String__end},4: {}};
+function fn_1_String(x) {
+	x;
+	return console.log(x);
+}
+function fn_1_String(x) {
+	x;
+	return console.log(x);
+}
+function fn_1_String(x) {
+	x;
+	return console.log(x);
+}
+function fn_2_Integer(x) {
+	x;
+	return console.log(x);
+}
+function fn_2_Integer(x) {
+	x;
+	return console.log(x);
+}
+function fn_3_v_do__Start_o_do__x__Integer__tail__Integer__end__end(x) {
+	return (function(_matched_target){
+	if (_matched_got =  _matched_target.Start) {
+	var a = _matched_got[0];
+	__unit;
+	test/golden/js_compiler/match_with_objects.brie_print_string.partial("whaaaaaaaat", "String").call();
+	return test/golden/js_compiler/match_with_objects.brie_print_integer.partial(a.tail, "Integer").call();
+
+	}
+}(x));
+}
+function fn_3_v_do__Start_o_do__y__Integer__tail__Integer__end__end(x) {
+	return (function(_matched_target){
+	if (_matched_got =  _matched_target.Start) {
+	var a = _matched_got[0];
+	__unit;
+	test/golden/js_compiler/match_with_objects.brie_print_string.partial("whaaaaaaaat", "String").call();
+	return test/golden/js_compiler/match_with_objects.brie_print_integer.partial(a.tail, "Integer").call();
+
+	}
+}(x));
+}
+function fn_3_v_do__Finish_String__end(x) {
+	return (function(_matched_target){
+	if (_matched_got =  _matched_target.Finish) {
+	var x = _matched_got[0];
+	return test/golden/js_compiler/match_with_objects.brie_print_string.partial(x, "String").call();
+
+	}
+}(x));
+}
+function main() {
+	var a = {Start: [{x: 2, tail: 3}]};
+	var b = {Start: [{y: 2, tail: 5}]};
+	var c = {Finish: ["hi"]};
+	test/golden/js_compiler/match_with_objects.brie_race.partial(a, "[^ Start <x = Integer, tail = Integer> ]").call();
+	test/golden/js_compiler/match_with_objects.brie_race.partial(b, "[^ Start <y = Integer, tail = Integer> ]").call();
+	return test/golden/js_compiler/match_with_objects.brie_race.partial(c, "[^ Finish String ]").call();
+}
+var test/golden/js_compiler/match_with_objects.brie_print_string = new_closure(1)
+var test/golden/js_compiler/match_with_objects.brie_print_integer = new_closure(2)
+var test/golden/js_compiler/match_with_objects.brie_race = new_closure(3)
+var test/golden/js_compiler/match_with_objects.brie_main = new_closure(4)
+console.log(main());

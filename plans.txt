@@ -26,6 +26,12 @@
   when passing in variables of the
   same name that were closed over.
 
+* Got to wrap if statements in a function in the
+  js implementation bc javascript doesn't have
+  scopes.
+
+* add illegal variable names (i.e 'matched_target', '_matched_got')
+
 # Roadmap
 
 [ ] Compile to js subset.

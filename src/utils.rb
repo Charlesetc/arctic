@@ -64,5 +64,6 @@ def parse_annotation(annotation)
 end
 
 def iscapital(c)
-  c and c < 'Z' and c > 'A'
+  c = c[0]
+  c and c <= 'Z' and c >= 'A'
 end

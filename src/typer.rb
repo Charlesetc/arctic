@@ -85,13 +85,8 @@ class Typer
     # here we need, in the right format
     #
     newvalue = update.children[2]
+    unwrap_child?(update, 1)
     var = update.children[1]
-
-    # potentially unbox
-    if var.class == Parens
-      # TODO: more asserts:
-      var = var.children[0]
-    end
 
     if var.class == Dot_access
       child = var.child
@@ -141,16 +136,13 @@ class Typer
 
   def handle_type_check(check)
     checked = check.children[1]
+    unwrap_child?(check, 2)
     annotation = check.children[2]
     handle_type_check_on_checked(checked, checked.type, annotation)
     check.type = checked.type
   end
 
   def handle_type_check_on_checked(checked, checked_type, annotation)
-    if annotation.class == Parens
-      annotation = annotation.children[0]
-    end
-
     if annotation.class == Object_literal
       if checked_type.class != ObjectType
         error_ast_type(checked, type: checked_type, expected: "an object, as was asserted")
@@ -189,7 +181,15 @@ class Typer
       unless ifrett == elserett
         error_ast_type(ifret, expected: "#{elserett.inspect}, because if statement branches must have the same return type")
       end
-      ifstmt.type = ifrett
+
+      type = merge_types(
+        ifrett,
+        elserett,
+        reason: "if statement branches must have the same return type",
+        ast_for_error: ifstmt,
+      )
+
+      ifstmt.type = type
     else
       # if statements that don't have else branches
       # will always return unit.
@@ -357,5 +357,73 @@ class Typer
     #
     @phonebook.insert_toplevel(@file.name, item.children[1].data, object)
   end
+
+  def handle_match(ast, expression, sections)
+
+    # Step 1: check to make sure
+    #         the types of the variants
+    #         can match the type of the expression
+
+    error_ast_type(ast, expected: "a varient type, since it's a match statement") if expression.type.class != VariantType
+
+    sections.each do |section|
+      expected_types = expression.type.names[section.name]
+
+      if expected_types
+        error_ast_type(
+          section.pattern,
+          type: expression.type,
+          expected: "a #{section.name} with #{section.arguments.length} arguments"
+        ) unless expected_types.length == section.arguments.length
+      end
+
+      # now we have more information than the 'pattern'
+      section.expected_types = expected_types
+    end
+
+    # if there's no type, then it's not
+    # really an option now is it.
+    sections = sections.select { |s| s.expected_types }
+
+
+    # Step 2: go through sections and define
+    #         the proper names (and their types)
+    #         for each one. Then triage them.
+
+    sections.each do |section|
+      @phonebook.enter
+      section.arguments.each_with_index do |arg, i|
+        error_ast(arg, "match argument must be an identifier") if arg.token != :ident
+
+        arg.type = section.expected_types[i]
+        @phonebook.insert(arg.data, arg)
+      end
+      section.expressions.each { |x| triage(x) }
+      section.return_type = section.expressions.last ?
+                            section.expressions.last.type :
+                            UnitType.new
+      @phonebook.exit
+    end
+
+
+    # Step 3: Find out the return type of each
+    #         and make sure that they all merge
+
+    sections = sections.clone
+    ret = sections.pop.return_type
+    sections.each do |section|
+      ret = merge_types(
+        ret, section.return_type,
+        reason: "all sections of match have to have the same type",
+        ast_for_error: ast
+      )
+    end
+
+    # Step 4: Set the return type of the match
+    #         expression
+
+    ast.type = ret
+  end
+
 end
 

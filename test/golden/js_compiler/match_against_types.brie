@@ -1,0 +1,12 @@
+define main [
+  let x = Zero
+  x = One 1
+  x = Two 1 2
+  x =  Three 1 2 3
+  match x [
+    Zero -> 0
+    One x -> x
+    Two a b -> b
+    Three a b c -> c
+  ]
+]
